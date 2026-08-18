@@ -5,6 +5,15 @@ export class HUD {
     this.checkpointEl = document.getElementById('hud-checkpoint');
     this.areaEl = document.getElementById('hud-area');
     this.checkpointTimer = 0;
+    this.crosshairEl = document.getElementById('crosshair');
+  }
+
+  showCrosshair() {
+    if (this.crosshairEl) this.crosshairEl.style.display = 'block';
+  }
+
+  hideCrosshair() {
+    if (this.crosshairEl) this.crosshairEl.style.display = 'none';
   }
 
   show() {

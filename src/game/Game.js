@@ -26,6 +26,7 @@ import { DeathScreen } from '../ui/DeathScreen.js';
 import { HUD } from '../ui/HUD.js';
 import { NextLevelTroll } from '../troll/NextLevelTroll.js';
 import { physics } from '../systems/Physics.js';
+import { ZombieManager } from '../enemies/ZombieManager.js';
 
 // Area boundaries (Z values, player moves in -Z direction)
 const AREA_BOUNDARIES = [
@@ -74,6 +75,9 @@ export class Game {
     this.menu = new MainMenu();
     this.deathScreen = new DeathScreen();
     this.hud = new HUD();
+
+    // Zombies
+    this.zombieManager = new ZombieManager(this.world.scene);
 
     // Fade overlay
     this.fadeOverlay = document.getElementById('fade-overlay');
@@ -260,6 +264,24 @@ export class Game {
       }
     });
 
+    // Mouse events for shooting
+    window.addEventListener('mousedown', (e) => {
+      if (e.button === 0 && this.state.is(STATES.PLAYING) && this.player.hasGun && document.pointerLockElement === document.body) {
+        // Trigger recoil
+        this.player.gun.position.z -= 0.2;
+        
+        // Raycast from camera center
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(new THREE.Vector2(0, 0), this.camera);
+        
+        // Check zombie hits
+        const hit = this.zombieManager.checkRaycastHit(raycaster);
+        if (hit) {
+          audio.playCoin(); // reusing coin sound for hit for now
+        }
+      }
+    });
+
     // Pause buttons
     document.getElementById('btn-resume').addEventListener('click', () => this._unpause());
     document.getElementById('btn-quit').addEventListener('click', () => this._quitToMenu());
@@ -278,6 +300,7 @@ export class Game {
 
     this.world.build(this.checkpointMgr, this.currentLevel);
     this._registerTrolls();
+    this.zombieManager.spawnZombies(this.currentLevel);
   }
 
   startGame() {
@@ -347,6 +370,7 @@ export class Game {
     this.trollManager.resetAll();
     this.particles.clear();
     this.hud.clearInventory();
+    this.hud.hideCrosshair();
     this.finalTrollActive = false;
     this.currentArea = -1;
   }
@@ -406,6 +430,22 @@ export class Game {
 
       // Area detection
       this._checkArea();
+
+      // Gun pickup
+      if (this.world.environment.gunPickup && this.world.environment.gunPickup.visible) {
+        const gunPos = this.world.environment.gunPickup.position;
+        if (this.player.getPosition().distanceTo(gunPos) < 2) {
+          this.world.environment.gunPickup.visible = false;
+          this.player.equipGun();
+          this.hud.showCrosshair();
+        } else {
+          // Spin the gun pickup
+          this.world.environment.gunPickup.rotation.y += clampedDt * 2;
+        }
+      }
+
+      // Zombies
+      this.zombieManager.update(clampedDt, this.player);
     }
 
     // World always updates (tree animation etc)

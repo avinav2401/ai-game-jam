@@ -1,0 +1,74 @@
+import * as THREE from 'three';
+import { Zombie } from './Zombie.js';
+
+export class ZombieManager {
+  constructor(scene) {
+    this.scene = scene;
+    this.zombies = [];
+  }
+
+  spawnZombies(level) {
+    this.clear();
+    
+    // Only spawn zombies in Level 2 near the house
+    if (level === 2) {
+      this.zombies.push(new Zombie(this.scene, -5, 5, -260));
+      this.zombies.push(new Zombie(this.scene, 5, 5, -265));
+      this.zombies.push(new Zombie(this.scene, 0, 5, -268));
+    }
+  }
+
+  update(dt, player) {
+    const playerPos = player.getPosition();
+    
+    for (const zombie of this.zombies) {
+      zombie.update(dt, playerPos);
+      
+      // Check collision with player
+      if (!zombie.isDead && !player.isDead) {
+        const dist = zombie.getPosition().distanceTo(playerPos);
+        if (dist < 1.5) {
+          // Zombie touches player -> Player dies
+          player.die();
+        }
+      }
+    }
+  }
+  
+  checkRaycastHit(raycaster) {
+    // Check if player shot a zombie
+    let closestZombie = null;
+    let minDistance = Infinity;
+
+    for (const zombie of this.zombies) {
+      if (zombie.isDead) continue;
+      
+      // We check intersection with the zombie's bounding box
+      const box = new THREE.Box3().setFromObject(zombie.mesh);
+      const target = new THREE.Vector3();
+      const hit = raycaster.ray.intersectBox(box, target);
+      
+      if (hit) {
+        const dist = raycaster.ray.origin.distanceTo(target);
+        if (dist < minDistance) {
+          minDistance = dist;
+          closestZombie = zombie;
+        }
+      }
+    }
+
+    if (closestZombie) {
+      closestZombie.kill();
+      return true;
+    }
+    
+    return false;
+  }
+
+  clear() {
+    for (const zombie of this.zombies) {
+      zombie.destroy();
+    }
+    this.zombies = [];
+  }
+}

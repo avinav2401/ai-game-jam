@@ -51,6 +51,7 @@ export class Environment {
     this.bridgePlanks = [];
     this.trapTree = null;
     this.safeTree = null;
+    this.gunPickup = null;
   }
 
   build(checkpointMgr, currentLevel = 1) {
@@ -178,6 +179,8 @@ export class Environment {
         this._addHammer(0, 6, -190),
         this._addHammer(0, 6, -210)
       ];
+      
+      this.gunPickup = this._addGunPickup(0, 4, -240);
     }
   }
 
@@ -666,6 +669,49 @@ export class Environment {
 
     group.position.set(x, y, z);
     this.scene.add(group);
+    return group;
+  }
+
+  _addGunPickup(x, y, z) {
+    const group = new THREE.Group();
+    
+    // Gun body (dark grey block)
+    const bodyGeo = new THREE.BoxGeometry(0.8, 0.3, 0.2);
+    const gunMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8, roughness: 0.2 });
+    const body = new THREE.Mesh(bodyGeo, gunMat);
+    group.add(body);
+    
+    // Gun barrel (cylinder)
+    const barrelGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.6, 8);
+    const barrel = new THREE.Mesh(barrelGeo, gunMat);
+    barrel.rotation.z = Math.PI / 2;
+    barrel.position.set(0.7, 0.05, 0);
+    group.add(barrel);
+    
+    // Gun handle
+    const handleGeo = new THREE.BoxGeometry(0.25, 0.5, 0.2);
+    const handleMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 }); // wooden grip
+    const handle = new THREE.Mesh(handleGeo, handleMat);
+    handle.position.set(-0.2, -0.3, 0);
+    handle.rotation.z = -0.2;
+    group.add(handle);
+
+    // Glowing aura
+    const light = new THREE.PointLight(0xff4444, 2, 10);
+    group.add(light);
+    
+    group.position.set(x, y, z);
+    
+    // Rotate slightly so it's visible
+    group.rotation.x = Math.PI / 4;
+
+    this.scene.add(group);
+    this.objects.push(group);
+    
+    // Add simple physics collider
+    const collider = physics.addCollider(body, 'solid', 'gun_pickup');
+    body.userData.collider = collider;
+
     return group;
   }
 

@@ -124,9 +124,31 @@ export class Player {
 
     // Dead state
     this.isDead = false;
+    this.hasGun = false;
+
+    // Gun Model
+    this.gun = new THREE.Group();
+    const gunBody = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.15, 0.1), new THREE.MeshStandardMaterial({ color: 0x333333 }));
+    const gunBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.3), new THREE.MeshStandardMaterial({ color: 0x333333 }));
+    gunBarrel.rotation.z = Math.PI / 2;
+    gunBarrel.position.set(0.3, 0.05, 0);
+    this.gun.add(gunBody, gunBarrel);
+    this.gun.position.set(0, -0.2, 0.1); // attach to hand
+    this.gun.visible = false;
+    this.armR.add(this.gun);
 
     // Knockback
     this.knockback = new THREE.Vector3();
+  }
+
+  equipGun() {
+    this.hasGun = true;
+    this.gun.visible = true;
+    
+    // Raise arm to aim forward
+    this.armR.rotation.x = -Math.PI / 2;
+    this.armR.rotation.z = 0.2;
+    this.armR.position.set(0.35, 1.2, -0.2); // bring it forward a bit
   }
 
   applyKnockback(force) {
@@ -157,6 +179,12 @@ export class Player {
       this.velocity.y = this.jumpForce;
       this.grounded = false;
       audio.playJump();
+    }
+
+    // Gun recoil animation
+    if (this.hasGun && this.gun.position.z < 0.1) {
+      this.gun.position.z += 1.0 * dt; // recover recoil
+      if (this.gun.position.z > 0.1) this.gun.position.z = 0.1;
     }
 
     // Move position
@@ -214,7 +242,9 @@ export class Player {
       
       // Arm swing
       this.armL.rotation.x = Math.sin(this.walkTime) * 0.8;
-      this.armR.rotation.x = -Math.sin(this.walkTime) * 0.8;
+      if (!this.hasGun) {
+        this.armR.rotation.x = -Math.sin(this.walkTime) * 0.8;
+      }
       
       // Leg swing
       this.legL.rotation.x = -Math.sin(this.walkTime) * 0.6;
@@ -233,7 +263,9 @@ export class Player {
       // Return to idle
       this.walkTime = 0;
       this.armL.rotation.x = THREE.MathUtils.lerp(this.armL.rotation.x, 0, 10 * dt);
-      this.armR.rotation.x = THREE.MathUtils.lerp(this.armR.rotation.x, 0, 10 * dt);
+      if (!this.hasGun) {
+        this.armR.rotation.x = THREE.MathUtils.lerp(this.armR.rotation.x, 0, 10 * dt);
+      }
       this.legL.rotation.x = THREE.MathUtils.lerp(this.legL.rotation.x, 0, 10 * dt);
       this.legR.rotation.x = THREE.MathUtils.lerp(this.legR.rotation.x, 0, 10 * dt);
       this.body.position.y = THREE.MathUtils.lerp(this.body.position.y, 0.85, 10 * dt);
@@ -254,6 +286,22 @@ export class Player {
     this.isDead = true;
     this.controller.disable();
     this.velocity.set(0, 0, 0);
+  }
+
+  reset() {
+    this.velocity.set(0, 0, 0);
+    this.isDead = false;
+    this.hasGun = false;
+    this.gun.visible = false;
+    
+    // Reset arm position
+    this.armR.rotation.x = 0;
+    this.armR.rotation.z = 0;
+    this.armR.position.set(0.35, 1.1, 0);
+    
+    this.mesh.rotation.z = 0;
+    this.mesh.rotation.x = 0;
+    this.mesh.position.y = 10;
   }
 
   respawnAt(position) {
