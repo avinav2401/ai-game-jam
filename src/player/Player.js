@@ -128,12 +128,20 @@ export class Player {
 
     // Gun Model
     this.gun = new THREE.Group();
-    const gunBody = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.15, 0.1), new THREE.MeshStandardMaterial({ color: 0x333333 }));
-    const gunBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.3), new THREE.MeshStandardMaterial({ color: 0x333333 }));
-    gunBarrel.rotation.z = Math.PI / 2;
-    gunBarrel.position.set(0.3, 0.05, 0);
+    const gunBody = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.25, 0.15), new THREE.MeshStandardMaterial({ color: 0x333333 }));
+    const gunBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.4), new THREE.MeshStandardMaterial({ color: 0x333333 }));
+    // Cylinder is along Y. The gun body is 0.25 along Y.
+    // Move barrel to the top of the body
+    gunBarrel.position.set(0, 0.2, 0.05);
     this.gun.add(gunBody, gunBarrel);
-    this.gun.position.set(0, -0.2, 0.1); // attach to hand
+    
+    // Attach to hand. The arm is a capsule along Y.
+    // When holding gun, arm is rotated -PI/2 on X, so its Y points backwards, -Y points forward.
+    // We want the gun barrel to point in local -Y.
+    // So gun needs to be rotated PI around X so its Y points to arm's -Y.
+    this.gun.rotation.x = Math.PI;
+    this.gun.position.set(0, -0.3, 0.05); // near bottom of the arm
+    
     this.gun.visible = false;
     this.armR.add(this.gun);
 

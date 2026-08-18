@@ -95,7 +95,7 @@ export class Zombie {
     const dist = this.mesh.position.distanceTo(playerPos);
     
     // Only chase if player is within range (e.g. 50 units)
-    if (dist < 50) {
+    if (dist < 50 && dist > 1.0) {
       // Look at player
       const targetPos = playerPos.clone();
       targetPos.y = this.mesh.position.y; // keep level

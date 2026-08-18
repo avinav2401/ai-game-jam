@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Zombie } from './Zombie.js';
+import { events } from '../game/EventManager.js';
 
 export class ZombieManager {
   constructor(scene) {
@@ -29,7 +30,7 @@ export class ZombieManager {
         const dist = zombie.getPosition().distanceTo(playerPos);
         if (dist < 1.5) {
           // Zombie touches player -> Player dies
-          player.die();
+          events.emit('playerDeath', 'You were eaten by a zombie.');
         }
       }
     }
@@ -62,6 +63,20 @@ export class ZombieManager {
       return true;
     }
     
+    return false;
+  }
+
+  checkBulletHit(pos, radius) {
+    for (const zombie of this.zombies) {
+      if (zombie.isDead) continue;
+      
+      const dist = zombie.getPosition().distanceTo(pos);
+      // Rough bounding sphere check
+      if (dist < 1.5) {
+        zombie.kill();
+        return true;
+      }
+    }
     return false;
   }
 

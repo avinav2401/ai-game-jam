@@ -78,6 +78,7 @@ export class Game {
 
     // Zombies
     this.zombieManager = new ZombieManager(this.world.scene);
+    this.bullets = [];
 
     // Fade overlay
     this.fadeOverlay = document.getElementById('fade-overlay');
@@ -267,18 +268,23 @@ export class Game {
     // Mouse events for shooting
     window.addEventListener('mousedown', (e) => {
       if (e.button === 0 && this.state.is(STATES.PLAYING) && this.player.hasGun && document.pointerLockElement === document.body) {
-        // Trigger recoil
-        this.player.gun.position.z -= 0.2;
+        // Spawn physical bullet
+        const dir = new THREE.Vector3();
+        this.camera.getWorldDirection(dir);
         
-        // Raycast from camera center
-        const raycaster = new THREE.Raycaster();
-        raycaster.setFromCamera(new THREE.Vector2(0, 0), this.camera);
+        const origin = new THREE.Vector3();
+        this.player.gun.getWorldPosition(origin);
         
-        // Check zombie hits
-        const hit = this.zombieManager.checkRaycastHit(raycaster);
-        if (hit) {
-          audio.playCoin(); // reusing coin sound for hit for now
-        }
+        const geo = new THREE.SphereGeometry(0.1, 4, 4);
+        const mat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.copy(origin);
+        this.scene.add(mesh);
+        
+        this.bullets.push({ mesh, dir, age: 0 });
+        
+        // Audio
+        audio.playJump(); // use jump sound for shoot for now
       }
     });
 
@@ -297,6 +303,12 @@ export class Game {
     this.world.clear();
     this.trollManager.clear();
     this.checkpointMgr.clear();
+    
+    // Clear bullets
+    for (const b of this.bullets) {
+      this.scene.remove(b.mesh);
+    }
+    this.bullets = [];
 
     this.world.build(this.checkpointMgr, this.currentLevel);
     this._registerTrolls();
@@ -446,6 +458,25 @@ export class Game {
 
       // Zombies
       this.zombieManager.update(clampedDt, this.player);
+      
+      // Bullets
+      for (let i = this.bullets.length - 1; i >= 0; i--) {
+        const b = this.bullets[i];
+        b.age += clampedDt;
+        if (b.age > 2) {
+          this.scene.remove(b.mesh);
+          this.bullets.splice(i, 1);
+          continue;
+        }
+        b.mesh.position.addScaledVector(b.dir, 50 * clampedDt);
+        
+        const hit = this.zombieManager.checkBulletHit(b.mesh.position, 0.5);
+        if (hit) {
+           this.scene.remove(b.mesh);
+           this.bullets.splice(i, 1);
+           audio.playCoin(); // hit sound
+        }
+      }
     }
 
     // World always updates (tree animation etc)
