@@ -94,10 +94,10 @@ export class Player {
 
     // Arms
     this.armL = new THREE.Group();
-    const armLMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.3, 16), this.shirtMat);
-    armLMesh.position.y = -0.15;
+    const armLMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.4, 16), this.shirtMat);
+    armLMesh.position.y = -0.2;
     const handL = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 16), this.skinMat);
-    handL.position.y = -0.32;
+    handL.position.y = -0.42;
     armLMesh.castShadow = true;
     handL.castShadow = true;
     this.armL.add(armLMesh, handL);
@@ -106,10 +106,10 @@ export class Player {
     this.visuals.add(this.armL);
 
     this.armR = new THREE.Group();
-    const armRMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.3, 16), this.shirtMat);
-    armRMesh.position.y = -0.15;
+    const armRMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.4, 16), this.shirtMat);
+    armRMesh.position.y = -0.2;
     const handR = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 16), this.skinMat);
-    handR.position.y = -0.32;
+    handR.position.y = -0.42;
     armRMesh.castShadow = true;
     handR.castShadow = true;
     this.armR.add(armRMesh, handR);
