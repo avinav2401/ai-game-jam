@@ -5,17 +5,15 @@ import { physics } from '../systems/Physics.js';
 export class TrollPlatformTroll extends BaseTroll {
   constructor(mesh) {
     super('troll_platform', {
-      triggerDistance: 20,
+      triggerDistance: 8, // Only trigger when player is on the immediately preceding platform
       triggerPosition: mesh.position.clone(),
       oneShot: false
     });
     this.mesh = mesh;
     this.initialX = mesh.position.x;
     
-    // Choose a random direction to move (left or right)
-    this.direction = Math.random() > 0.5 ? 1 : -1;
-    this.moveDistance = 4; // Shift by 4 units
-    this.targetX = this.initialX + (this.direction * this.moveDistance);
+    // Choose a target X that forces a noticeable shift (to the opposite side)
+    this.targetX = this.initialX > 0 ? -3 : 3;
     this.speed = 15; // Move very fast (units per second)
     
     this.hasMoved = false;
