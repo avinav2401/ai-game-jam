@@ -60,10 +60,10 @@ export class Environment {
     this.rockMat = new THREE.MeshStandardMaterial({ color: 0x8b8c89, roughness: 0.9, flatShading: true });
     this.treeTrunkMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.9, flatShading: true });
     
-    // Pine tree material (flat shading, sharper green)
-    this.pineLeavesMat = new THREE.MeshStandardMaterial({ color: 0x2e8b57, roughness: 0.9, flatShading: true });
-    // Puffy/Leafy tree material (smooth shading, slightly darker/richer green)
-    this.puffLeavesMat = new THREE.MeshStandardMaterial({ color: 0x228B22, roughness: 0.8, flatShading: false });
+    // Pine tree material
+    this.pineLeavesMat = new THREE.MeshStandardMaterial({ color: 0x1f4728, roughness: 0.9, flatShading: true });
+    // Leafy tree material
+    this.puffLeavesMat = new THREE.MeshStandardMaterial({ color: 0x2d5a27, roughness: 0.8, flatShading: true });
     
     this.waterMat = new THREE.MeshPhysicalMaterial({ color: 0x0077be, transparent: true, opacity: 0.6, roughness: 0.1, metalness: 0.1 });
 
@@ -253,55 +253,57 @@ export class Environment {
     trunk.castShadow = true;
     group.add(trunk);
 
-    // Randomly pick between puffy tree (low poly spheres) or pine tree (layered cones)
+    // Randomly pick between leafy tree or pine tree
     if (Math.random() > 0.5) {
-      // Leafy smooth tree
-      const puffGeo = new THREE.SphereGeometry(1.0, 16, 16); 
+      // Leafy tree: Multiple overlapping Icosahedrons (detail 1) for a realistic low-poly canopy
+      const puffGeo = new THREE.IcosahedronGeometry(1, 1); 
       
       const puff1 = new THREE.Mesh(puffGeo, this.puffLeavesMat);
-      puff1.position.set(0, 2.0, 0);
-      puff1.scale.set(1.4, 1.2, 1.4);
+      puff1.position.set(0, 2.5, 0);
+      puff1.scale.set(1.5, 1.3, 1.5);
       puff1.castShadow = true;
       group.add(puff1);
 
       const puff2 = new THREE.Mesh(puffGeo, this.puffLeavesMat);
-      puff2.position.set(0.8, 2.4, -0.4);
-      puff2.scale.set(0.9, 0.9, 0.9);
+      puff2.position.set(0.6, 2.0, 0.6);
+      puff2.scale.set(1.0, 1.0, 1.0);
       puff2.castShadow = true;
       group.add(puff2);
 
       const puff3 = new THREE.Mesh(puffGeo, this.puffLeavesMat);
-      puff3.position.set(-0.7, 2.3, 0.6);
-      puff3.scale.set(1.0, 0.8, 1.0);
+      puff3.position.set(-0.6, 2.1, 0.5);
+      puff3.scale.set(0.9, 0.9, 0.9);
       puff3.castShadow = true;
       group.add(puff3);
       
       const puff4 = new THREE.Mesh(puffGeo, this.puffLeavesMat);
-      puff4.position.set(0.2, 2.8, 0.4);
-      puff4.scale.set(0.8, 0.8, 0.8);
+      puff4.position.set(0.4, 2.2, -0.6);
+      puff4.scale.set(1.1, 1.0, 1.1);
       puff4.castShadow = true;
       group.add(puff4);
+
+      const puff5 = new THREE.Mesh(puffGeo, this.puffLeavesMat);
+      puff5.position.set(-0.4, 1.9, -0.5);
+      puff5.scale.set(0.8, 0.8, 0.8);
+      puff5.castShadow = true;
+      group.add(puff5);
     } else {
-      // Pine tree (cones) - 8 sided for a better jagged look, more overlapping layers
-      const cone1 = new THREE.Mesh(new THREE.ConeGeometry(1.8, 2.2, 8), this.pineLeavesMat);
-      cone1.position.y = 1.3;
-      cone1.castShadow = true;
-      group.add(cone1);
-
-      const cone2 = new THREE.Mesh(new THREE.ConeGeometry(1.5, 2.0, 8), this.pineLeavesMat);
-      cone2.position.y = 2.0;
-      cone2.castShadow = true;
-      group.add(cone2);
-
-      const cone3 = new THREE.Mesh(new THREE.ConeGeometry(1.1, 1.8, 8), this.pineLeavesMat);
-      cone3.position.y = 2.8;
-      cone3.castShadow = true;
-      group.add(cone3);
-      
-      const cone4 = new THREE.Mesh(new THREE.ConeGeometry(0.7, 1.4, 8), this.pineLeavesMat);
-      cone4.position.y = 3.6;
-      cone4.castShadow = true;
-      group.add(cone4);
+      // Pine tree: 5 overlapping cone layers with 6 segments, tapering nicely
+      const layers = 5;
+      for (let i = 0; i < layers; i++) {
+        const radius = 1.6 - (i * 0.25);
+        const height = 1.8;
+        const yPos = 1.2 + (i * 0.7);
+        const cone = new THREE.Mesh(new THREE.ConeGeometry(radius, height, 6), this.pineLeavesMat);
+        cone.position.y = yPos;
+        // slightly tilt some layers for realism
+        if (i % 2 === 0 && i > 0) {
+          cone.rotation.z = (Math.random() - 0.5) * 0.1;
+          cone.rotation.x = (Math.random() - 0.5) * 0.1;
+        }
+        cone.castShadow = true;
+        group.add(cone);
+      }
     }
 
     // group.position.set places the bottom of the trunk exactly at (x, y, z)
