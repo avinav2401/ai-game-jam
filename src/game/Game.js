@@ -267,7 +267,7 @@ export class Game {
 
     // Mouse events for shooting
     window.addEventListener('mousedown', (e) => {
-      if (e.button === 0 && this.state.is(STATES.PLAYING) && this.player.hasGun && document.pointerLockElement === document.body) {
+      if (e.button === 0 && this.state.is(STATES.PLAYING) && this.player.hasGun && document.pointerLockElement) {
         // Spawn physical bullet
         const dir = new THREE.Vector3();
         this.camera.getWorldDirection(dir);
