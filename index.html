@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE WORLD HATES YOU</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="game-container"></div>
+
+  <!-- Main Menu -->
+  <div id="main-menu" class="ui-overlay">
+    <div class="menu-content">
+      <h1 class="game-title">THE WORLD<br><span class="hate">HATES</span><br>YOU</h1>
+      <p class="subtitle">A game where nothing is what it seems.</p>
+      <button id="btn-play" class="menu-btn primary">PLAY</button>
+      <button id="btn-howto" class="menu-btn">HOW TO PLAY</button>
+    </div>
+  </div>
+
+  <!-- How To Play -->
+  <div id="howto-screen" class="ui-overlay" style="display:none">
+    <div class="howto-content">
+      <h2>CONTROLS</h2>
+      <div class="controls-grid">
+        <div class="key-row"><span class="key">W A S D</span> Move</div>
+        <div class="key-row"><span class="key">SHIFT</span> Sprint</div>
+        <div class="key-row"><span class="key">SPACE</span> Jump</div>
+        <div class="key-row"><span class="key">MOUSE</span> Look Around</div>
+        <div class="key-row"><span class="key">R</span> Restart</div>
+        <div class="key-row"><span class="key">ESC</span> Pause</div>
+      </div>
+      <p class="tip">Objective: Reach the giant glowing tree.</p>
+      <p class="tip warning">Trust nothing.</p>
+      <button id="btn-back" class="menu-btn">BACK</button>
+    </div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud" style="display:none">
+    <div id="hud-objective" class="hud-objective">
+      <span class="obj-icon">🌳</span> Reach the Giant Tree
+    </div>
+    <div id="hud-hint" class="hud-hint">
+      Hold <b>SHIFT</b> to Sprint!
+    </div>
+    <div id="hud-deaths" class="hud-deaths">
+      Deaths: <span id="death-count">0</span>
+    </div>
+    <div id="hud-checkpoint" class="hud-checkpoint" style="display:none">
+      ✅ Checkpoint Reached
+    </div>
+    <div id="hud-area" class="hud-area" style="display:none"></div>
+    <div id="inventory-container" class="inventory-container">
+      <div class="inventory-title">INVENTORY</div>
+      <div id="inventory-slots" class="inventory-slots">
+        <!-- Items will be added here via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Death Screen -->
+  <div id="death-screen" class="ui-overlay" style="display:none">
+    <div class="death-content">
+      <h2 class="death-title">💀</h2>
+      <p id="death-message" class="death-msg"></p>
+      <p class="death-sub">Respawning...</p>
+    </div>
+  </div>
+
+  <!-- Pause Screen -->
+  <div id="pause-screen" class="ui-overlay" style="display:none">
+    <div class="pause-content">
+      <h2>PAUSED</h2>
+      <button id="btn-resume" class="menu-btn primary">RESUME</button>
+      <button id="btn-quit" class="menu-btn">QUIT TO MENU</button>
+    </div>
+  </div>
+
+  <!-- Victory Screen -->
+  <div id="victory-screen" class="ui-overlay" style="display:none">
+    <div class="victory-content">
+      <h2 id="victory-title" class="victory-title">YOU WIN!</h2>
+      <p id="victory-sub" class="victory-sub"></p>
+      <div id="victory-score" class="victory-score" style="display:none"></div>
+      <button id="btn-restart" class="menu-btn primary" style="display:none">TRY AGAIN?</button>
+    </div>
+  </div>
+
+  <!-- Fade overlay for transitions -->
+  <div id="fade-overlay" class="fade-overlay"></div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
