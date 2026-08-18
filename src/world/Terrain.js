@@ -117,6 +117,12 @@ export class Terrain {
         i++;
       }
       
+      // Secret path platforms on the far right (x = 12)
+      // Spaced closely to make it an easy alternate route!
+      for (let j = 0; j < 8; j++) {
+        this._addParkourPlatform(12, -3, -150 - j * 10, 4, 4);
+      }
+      
       // Area 5 — Final ascent to the house (Z -230 to -280)
       this._addStairs(0, -2, -232, 6, 5, 12, 20);
       this._addGround(0, 2, -259, FOREST_WIDTH, 2, 42);
@@ -213,12 +219,10 @@ export class Terrain {
   _addParkourPlatform(x, y, z, w, d) {
     const h = 1.0;
     const geo = new THREE.BoxGeometry(w, h, d);
-    const mat = new THREE.MeshStandardMaterial({
-      color: 0x887755,
-      flatShading: true,
-      roughness: 0.9,
-    });
-    const mesh = new THREE.Mesh(geo, mat);
+    const topMat = new THREE.MeshStandardMaterial({ color: 0x44aa44, roughness: 0.9, flatShading: true });
+    const sideMat = new THREE.MeshStandardMaterial({ color: 0x6b4226, roughness: 1.0, flatShading: true });
+    const materials = [sideMat, sideMat, topMat, sideMat, sideMat, sideMat];
+    const mesh = new THREE.Mesh(geo, materials);
     // Base y is surface y+1, so mesh center is (y+1) - h/2
     mesh.position.set(x, y + 1 - h / 2, z);
     mesh.receiveShadow = true;

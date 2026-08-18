@@ -66,6 +66,14 @@ export class Environment {
     if (currentLevel === 1) {
       // LEVEL 1: Start to Giant Tree, Fork in the road
 
+      // Grass patches (BEFORE trees so getGroundY doesn't hit trees)
+      for (let i = 0; i < 40; i++) {
+        const x = (Math.random() - 0.5) * 30;
+        const z = 5 - Math.random() * 110;
+        const y = physics.getGroundY(x, z);
+        if (y !== -Infinity) this._addGrassPatch(x, y, z);
+      }
+
       // Trees, bushes, rocks scattered
       for (let i = 0; i < 80; i++) {
         const side = Math.random() > 0.5 ? 1 : -1;
@@ -83,14 +91,6 @@ export class Environment {
         const y = physics.getGroundY(x, z);
         if (y === -Infinity) continue;
         this._addRock(x, y, z);
-      }
-      
-      // Grass patches
-      for (let i = 0; i < 40; i++) {
-        const x = (Math.random() - 0.5) * 30;
-        const z = 5 - Math.random() * 110;
-        const y = physics.getGroundY(x, z);
-        if (y !== -Infinity) this._addGrassPatch(x, y, z);
       }
 
       this._addSign(0, 0, -5, 'Walk toward the tree.\nIt\'s friendly. Probably.', 0);
@@ -110,6 +110,14 @@ export class Environment {
     } else if (currentLevel === 2) {
       // LEVEL 2: Deep Valley, Parkour, Tunnel
 
+      // Grass patches (BEFORE trees so getGroundY doesn't hit trees)
+      for (let i = 0; i < 80; i++) {
+        const x = (Math.random() - 0.5) * 30;
+        const z = 5 - Math.random() * 240;
+        const y = physics.getGroundY(x, z);
+        if (y !== -Infinity) this._addGrassPatch(x, y, z);
+      }
+
       // Trees, bushes, rocks scattered
       for (let i = 0; i < 150; i++) {
         const side = Math.random() > 0.5 ? 1 : -1;
@@ -127,14 +135,6 @@ export class Environment {
         const y = physics.getGroundY(x, z);
         if (y === -Infinity) continue;
         this._addRock(x, y, z);
-      }
-
-      // Grass patches
-      for (let i = 0; i < 80; i++) {
-        const x = (Math.random() - 0.5) * 30;
-        const z = 5 - Math.random() * 240;
-        const y = physics.getGroundY(x, z);
-        if (y !== -Infinity) this._addGrassPatch(x, y, z);
       }
 
       this._addSign(2, 3, -38, '→ SAFE PATH', Math.PI / 8);

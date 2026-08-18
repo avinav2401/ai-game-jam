@@ -5,9 +5,9 @@ import { physics } from '../systems/Physics.js';
 export class TrollPlatformTroll extends BaseTroll {
   constructor(mesh) {
     super('troll_platform', {
-      triggerDistance: 15,
+      triggerDistance: 20,
       triggerPosition: mesh.position.clone(),
-      oneShot: true
+      oneShot: false
     });
     this.mesh = mesh;
     this.initialX = mesh.position.x;
