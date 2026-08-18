@@ -259,7 +259,11 @@ export class Game {
     // Parkour platform jump shuffle
     events.on('playerJump', () => {
       if (this.currentLevel === 2 && this.state.is(STATES.PLAYING)) {
-        this.world.terrain.shuffleParkourPlatforms();
+        // Only shuffle if player is actually near or in the parkour section
+        const playerZ = this.player.mesh.position.z;
+        if (playerZ < -130 && playerZ > -240) {
+          this.world.terrain.shuffleParkourPlatforms();
+        }
       }
     });
 
