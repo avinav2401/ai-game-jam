@@ -172,9 +172,6 @@ export class Environment {
       const cp4 = this._addCheckpointFlag(0, -3, -160);
       checkpointMgr.addCheckpoint('cp4', new THREE.Vector3(0, -2, -160), cp4);
 
-      const cp4b = this._addCheckpointFlag(0, -3, -230);
-      checkpointMgr.addCheckpoint('cp4b', new THREE.Vector3(0, -2, -230), cp4b);
-
       const cp5 = this._addCheckpointFlag(0, 2, -250);
       checkpointMgr.addCheckpoint('cp5', new THREE.Vector3(0, 3, -250), cp5);
 

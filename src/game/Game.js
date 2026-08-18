@@ -282,14 +282,14 @@ export class Game {
     // Mouse events for shooting
     window.addEventListener('mousedown', (e) => {
       if (e.button === 0 && this.state.is(STATES.PLAYING) && this.player.hasGun && document.pointerLockElement) {
-        // Spawn physical bullet
+        // Spawn physical bullet (made slightly larger for better visibility)
         const dir = new THREE.Vector3();
         this.camera.getWorldDirection(dir);
         
         const origin = new THREE.Vector3();
         this.player.gun.getWorldPosition(origin);
         
-        const geo = new THREE.SphereGeometry(0.1, 4, 4);
+        const geo = new THREE.SphereGeometry(0.2, 8, 8);
         const mat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
         const mesh = new THREE.Mesh(geo, mat);
         mesh.position.copy(origin);
@@ -484,7 +484,8 @@ export class Game {
         }
         b.mesh.position.addScaledVector(b.dir, 50 * clampedDt);
         
-        const hit = this.zombieManager.checkBulletHit(b.mesh.position, 0.5);
+        // Massive hit radius (2.0) to make it super easy to hit
+        const hit = this.zombieManager.checkBulletHit(b.mesh.position, 2.0);
         if (hit) {
            this.scene.remove(b.mesh);
            this.bullets.splice(i, 1);
