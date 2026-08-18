@@ -3,7 +3,7 @@ import * as THREE from 'three';
 // Simple AABB-based physics: gravity, ground check, collision boxes
 export class Physics {
   constructor() {
-    this.gravity = -15; // Slowed down gravity for floaty falling
+    this.gravity = -8; // Slowed down gravity for floaty falling
     this.colliders = []; // { box: THREE.Box3, type: 'solid'|'platform'|'kill', id: string }
   }
 

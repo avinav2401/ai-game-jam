@@ -211,7 +211,6 @@ export class Terrain {
     this.grounds = [];
     this.objects = [];
     this.parkourPlatforms = [];
-    this.hasShuffledParkour = false;
   }
 
   _addParkourPlatform(x, y, z, w, d) {
@@ -223,8 +222,6 @@ export class Terrain {
     const mesh = new THREE.Mesh(geo, materials);
     // Base y is surface y+1, so mesh center is (y+1) - h/2
     mesh.position.set(x, y + 1 - h / 2, z);
-    mesh.userData.targetX = x;
-    
     mesh.receiveShadow = true;
     mesh.castShadow = true;
     this.scene.add(mesh);
@@ -237,37 +234,7 @@ export class Terrain {
     return mesh;
   }
   
-  shuffleParkourPlatforms() {
-    if (this.hasShuffledParkour) return; // Only move once!
-    this.hasShuffledParkour = true;
-    
-    // Pick 2 random platforms to move
-    const numToMove = Math.min(2, this.parkourPlatforms.length);
-    const shuffled = [...this.parkourPlatforms].sort(() => 0.5 - Math.random());
-    
-    for (let i = 0; i < numToMove; i++) {
-      const plat = shuffled[i];
-      const sides = [-4, 0, 4];
-      const newX = sides[Math.floor(Math.random() * sides.length)];
-      plat.mesh.userData.targetX = newX;
-    }
-  }
 
-  update(dt) {
-    for (const plat of this.parkourPlatforms) {
-      const mesh = plat.mesh;
-      if (mesh.userData.targetX !== undefined) {
-        // Move towards target
-        const speed = 10;
-        mesh.position.x = THREE.MathUtils.lerp(mesh.position.x, mesh.userData.targetX, speed * dt);
-        
-        // Update physics collider
-        if (mesh.userData.collider) {
-          physics.updateColliderFromMesh(mesh.userData.collider);
-        }
-      }
-    }
-  }
   
   _addPath(x, y, z, w, h, d) {
     const geo = new THREE.BoxGeometry(w, h, d);
