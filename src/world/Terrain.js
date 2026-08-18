@@ -222,6 +222,8 @@ export class Terrain {
     const mesh = new THREE.Mesh(geo, materials);
     // Base y is surface y+1, so mesh center is (y+1) - h/2
     mesh.position.set(x, y + 1 - h / 2, z);
+    mesh.userData.targetX = x;
+    
     mesh.receiveShadow = true;
     mesh.castShadow = true;
     this.scene.add(mesh);
@@ -232,6 +234,33 @@ export class Terrain {
     mesh.userData.collider = collider;
     
     return mesh;
+  }
+  
+  shuffleParkourPlatforms() {
+    for (const plat of this.parkourPlatforms) {
+      // Pick -4, 0, or 4 randomly (spread it out so it's a tricky jump)
+      const sides = [-4, 0, 4];
+      const newX = sides[Math.floor(Math.random() * sides.length)];
+      plat.mesh.userData.targetX = newX;
+    }
+  }
+
+  update(dt) {
+    for (const plat of this.parkourPlatforms) {
+      const mesh = plat.mesh;
+      if (mesh.userData.targetX !== undefined) {
+        // Move towards target
+        const speed = 10;
+        mesh.position.x = THREE.MathUtils.lerp(mesh.position.x, mesh.userData.targetX, speed * dt);
+        
+        // Update physics collider
+        if (mesh.userData.collider) {
+          const col = mesh.userData.collider;
+          col.minX = mesh.position.x - col.w / 2;
+          col.maxX = mesh.position.x + col.w / 2;
+        }
+      }
+    }
   }
   
   _addPath(x, y, z, w, h, d) {

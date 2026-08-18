@@ -84,5 +84,8 @@ export class World {
     if (this.environment.update) {
       this.environment.update(dt);
     }
+    if (this.terrain.update) {
+      this.terrain.update(dt);
+    }
   }
 }

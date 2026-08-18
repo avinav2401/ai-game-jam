@@ -251,6 +251,13 @@ export class Game {
       }, 500);
     });
 
+    // Parkour platform jump shuffle
+    events.on('playerJump', () => {
+      if (this.currentLevel === 2 && this.state.is(STATES.PLAYING)) {
+        this.world.terrain.shuffleParkourPlatforms();
+      }
+    });
+
     // Keyboard events
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Escape') {

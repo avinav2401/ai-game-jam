@@ -187,6 +187,7 @@ export class Player {
       this.velocity.y = this.jumpForce;
       this.grounded = false;
       audio.playJump();
+      events.emit('playerJump');
     }
 
     // Gun recoil animation
