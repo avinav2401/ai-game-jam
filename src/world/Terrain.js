@@ -117,11 +117,8 @@ export class Terrain {
         i++;
       }
       
-      // Secret path platforms on the far right (x = 12)
-      // Spaced closely to make it an easy alternate route!
-      for (let j = 0; j < 8; j++) {
-        this._addParkourPlatform(12, -3, -150 - j * 10, 4, 4);
-      }
+      // End of parkour landing pad
+      this._addGround(0, -3, -230, 8, 2, 8);
       
       // Area 5 — Final ascent to the house (Z -230 to -280)
       this._addStairs(0, -2, -232, 6, 5, 12, 20);
