@@ -10,6 +10,8 @@ import { MovingDoorTroll } from '../troll/MovingDoorTroll.js';
 import { FakeCheckpointTroll } from '../troll/FakeCheckpointTroll.js';
 import { RunningCoinTroll } from '../troll/RunningCoinTroll.js';
 import { LyingNPCTroll } from '../troll/LyingNPCTroll.js';
+import { GunTreeTroll } from '../troll/GunTreeTroll.js';
+import { GunTreeTroll } from '../troll/GunTreeTroll.js';
 import { ButtonTrapTroll } from '../troll/ButtonTrapTroll.js';
 import { LadderTroll } from '../troll/LadderTroll.js';
 import { FallingTreeTroll } from '../troll/FallingTreeTroll.js';
@@ -139,6 +141,10 @@ export class Game {
     } else if (this.currentLevel === 2) {
       if (this.world.environment.bridgePlanks) {
         this.trollManager.register(new FakeBridgeTroll(this.world.environment.bridgePlanks));
+      }
+
+      if (this.world.environment.gunTree) {
+        this.trollManager.register(new GunTreeTroll(this.world.environment.gunTree, this.scene));
       }
       this.trollManager.register(new InvisibleWallTroll(this.scene));
       if (this.world.environment.door) this.trollManager.register(new MovingDoorTroll(this.world.environment.door));

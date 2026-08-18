@@ -379,6 +379,24 @@ html, body {
   letter-spacing: 2px;
 }
 
+.inventory-slot.empty {
+  opacity: 0.5;
+}
+
+#crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-family: 'Outfit', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8), 0 0 2px black;
+  pointer-events: none;
+  z-index: 1000;
+}
+
 .inventory-slots {
   display: flex;
   flex-direction: column;

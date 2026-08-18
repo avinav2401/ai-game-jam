@@ -163,6 +163,9 @@ export class Environment {
       const cp2 = this._addCheckpointFlag(0, 3, -72);
       checkpointMgr.addCheckpoint('cp2', new THREE.Vector3(0, 4, -72), cp2);
 
+      // Gun Tree troll right before tunnel
+      this.gunTree = this._addTree(6, 3, -70);
+
       const cp3 = this._addCheckpointFlag(-1.5, 0, -115);
       checkpointMgr.addCheckpoint('cp3_fake', new THREE.Vector3(-1.5, 1, -115), cp3, true);
 
