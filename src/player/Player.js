@@ -16,29 +16,33 @@ export class Player {
     this.visuals.position.y = -0.68; // Shift down so feet touch the ground
     
     // Materials
-    // Materials
-    const skinMat = new THREE.MeshStandardMaterial({ color: 0xcd9a5b, roughness: 0.6, flatShading: true });
-    const shirtMat = new THREE.MeshStandardMaterial({ color: 0x0f5e9c, roughness: 0.7, flatShading: true });
+    this.skinMat = new THREE.MeshStandardMaterial({ color: 0xcd9a5b, roughness: 0.6, flatShading: true });
+    this.shirtMat = new THREE.MeshStandardMaterial({ color: 0x0f5e9c, roughness: 0.7, flatShading: true });
     const pantsMat = new THREE.MeshStandardMaterial({ color: 0x808080, roughness: 0.9, flatShading: true });
     const hairMat = new THREE.MeshStandardMaterial({ color: 0x3d2010, roughness: 0.9, flatShading: true });
     const shoeMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.8, flatShading: true });
     const glassFrameMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5, flatShading: true });
     const glassLensMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2, flatShading: true, opacity: 0.8, transparent: true });
 
-    // Head (Rounded/Oval)
+    // Head (Tapered box/cube)
     this.head = new THREE.Group();
-    // Slightly flattened sphere
-    const headGeo = new THREE.SphereGeometry(0.35, 32, 32);
-    const headMesh = new THREE.Mesh(headGeo, skinMat);
-    headMesh.scale.set(1, 1.1, 0.9); 
+    // Using a 4-sided cylinder to create a tapered box
+    const headGeo = new THREE.CylinderGeometry(0.35, 0.25, 0.5, 4);
+    // Rotate 45 degrees so flat sides face front/back/left/right
+    headGeo.rotateY(Math.PI / 4);
+    const headMesh = new THREE.Mesh(headGeo, this.skinMat);
     headMesh.castShadow = true;
     this.head.add(headMesh);
     
-    // Hair (Puffy/Afro sphere)
-    const hairGeo = new THREE.SphereGeometry(0.4, 32, 32);
-    const hairMesh = new THREE.Mesh(hairGeo, hairMat);
-    hairMesh.position.set(0, 0.1, -0.05);
-    hairMesh.scale.set(1.0, 0.9, 1.0);
+    // Hair (Stylized blocky hair)
+    const hairGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.2, 8);
+    // Add a top bump for the afro/puffy look
+    const hairTopGeo = new THREE.SphereGeometry(0.35, 8, 8);
+    hairTopGeo.translate(0, 0.1, 0);
+    const hairMesh = new THREE.Mesh(hairGeo, this.hairMat);
+    const hairTop = new THREE.Mesh(hairTopGeo, this.hairMat);
+    hairMesh.add(hairTop);
+    hairMesh.position.set(0, 0.15, -0.02);
     hairMesh.castShadow = true;
     this.head.add(hairMesh);
 
@@ -47,53 +51,52 @@ export class Player {
     const lensGeo = new THREE.BoxGeometry(0.18, 0.08, 0.05);
     
     const leftFrame = new THREE.Mesh(frameGeo, glassFrameMat);
-    leftFrame.position.set(-0.14, 0.05, 0.32);
+    leftFrame.position.set(-0.14, 0.05, 0.25);
     leftFrame.rotation.y = -0.15;
     const leftLens = new THREE.Mesh(lensGeo, glassLensMat);
-    leftLens.position.set(-0.14, 0.05, 0.32);
+    leftLens.position.set(-0.14, 0.05, 0.25);
     leftLens.rotation.y = -0.15;
     
     const rightFrame = new THREE.Mesh(frameGeo, glassFrameMat);
-    rightFrame.position.set(0.14, 0.05, 0.32);
+    rightFrame.position.set(0.14, 0.05, 0.25);
     rightFrame.rotation.y = 0.15;
     const rightLens = new THREE.Mesh(lensGeo, glassLensMat);
-    rightLens.position.set(0.14, 0.05, 0.32);
+    rightLens.position.set(0.14, 0.05, 0.25);
     rightLens.rotation.y = 0.15;
     
     const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.03, 0.04), glassFrameMat);
-    bridge.position.set(0, 0.05, 0.34);
+    bridge.position.set(0, 0.05, 0.27);
 
     this.head.add(leftFrame, leftLens, rightFrame, rightLens, bridge);
 
     // Mouth (Frown)
     const mouthMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-    const mouthGeo = new THREE.BoxGeometry(0.08, 0.015, 0.02);
+    const mouthGeo = new THREE.BoxGeometry(0.06, 0.015, 0.02);
     const mouth = new THREE.Mesh(mouthGeo, mouthMat);
-    mouth.position.set(0, -0.12, 0.31);
-    mouth.rotation.z = Math.PI; // Optional, it's a box so frown can just be slightly angled
+    mouth.position.set(0, -0.1, 0.25);
     // To make it look like a frown, tilt two small boxes
-    const mouthL = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.015, 0.02), mouthMat);
-    mouthL.position.set(-0.02, -0.13, 0.31);
+    const mouthL = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.015, 0.02), mouthMat);
+    mouthL.position.set(-0.02, -0.11, 0.25);
     mouthL.rotation.z = -0.2;
-    const mouthR = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.015, 0.02), mouthMat);
-    mouthR.position.set(0.02, -0.13, 0.31);
+    const mouthR = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.015, 0.02), mouthMat);
+    mouthR.position.set(0.02, -0.11, 0.25);
     mouthR.rotation.z = 0.2;
-    this.head.add(mouthL, mouthR);
+    this.head.add(mouth, mouthL, mouthR);
     
     this.head.position.y = 1.25;
     this.visuals.add(this.head);
 
     // Body (Shirt) - Rounded
-    this.body = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.22, 0.45, 16), shirtMat);
+    this.body = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.22, 0.45, 16), this.shirtMat);
     this.body.position.y = 0.75;
     this.body.castShadow = true;
     this.visuals.add(this.body);
 
     // Arms
     this.armL = new THREE.Group();
-    const armLMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.3, 16), shirtMat);
+    const armLMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.3, 16), this.shirtMat);
     armLMesh.position.y = -0.15;
-    const handL = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 16), skinMat);
+    const handL = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 16), this.skinMat);
     handL.position.y = -0.32;
     armLMesh.castShadow = true;
     handL.castShadow = true;
@@ -103,9 +106,9 @@ export class Player {
     this.visuals.add(this.armL);
 
     this.armR = new THREE.Group();
-    const armRMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.3, 16), shirtMat);
+    const armRMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.3, 16), this.shirtMat);
     armRMesh.position.y = -0.15;
-    const handR = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 16), skinMat);
+    const handR = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 16), this.skinMat);
     handR.position.y = -0.32;
     armRMesh.castShadow = true;
     handR.castShadow = true;
@@ -200,7 +203,16 @@ export class Player {
   applyKnockback(force) {
     this.knockback.copy(force);
     this.velocity.add(force);
-    this.grounded = false;
+    this.isDead = false;
+  }
+
+  setColors(skinColorHex, shirtColorHex) {
+    if (skinColorHex !== null) {
+      this.skinMat.color.setHex(skinColorHex);
+    }
+    if (shirtColorHex !== null) {
+      this.shirtMat.color.setHex(shirtColorHex);
+    }
   }
 
   update(dt) {

@@ -108,6 +108,13 @@ export class Game {
 
     // Initialize menu
     this.menu.init(() => this.startGame());
+    this.menu.setOnColorChange((type, color) => {
+      if (type === 'skin') {
+        this.player.setColors(color, null);
+      } else if (type === 'shirt') {
+        this.player.setColors(null, color);
+      }
+    });
   }
 
   _registerTrolls() {

@@ -17,7 +17,38 @@
       <h1 class="game-title">THE WORLD<br><span class="hate">HATES</span><br>YOU</h1>
       <p class="subtitle">A game where nothing is what it seems.</p>
       <button id="btn-play" class="menu-btn primary">PLAY</button>
+      <button id="btn-customize" class="menu-btn">CUSTOMIZE</button>
       <button id="btn-howto" class="menu-btn">HOW TO PLAY</button>
+    </div>
+  </div>
+
+  <!-- Customize Screen -->
+  <div id="customize-screen" class="ui-overlay" style="display:none">
+    <div class="howto-content">
+      <h2>CUSTOMIZE CHARACTER</h2>
+      <div class="controls-grid" style="text-align: left; gap: 10px; margin-bottom: 20px;">
+        <div>
+          <label>Skin Color:</label>
+          <div class="color-options" id="skin-colors" style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="color-btn" style="background-color: #ffdfc4; width: 40px; height: 40px; border-radius: 5px; cursor: pointer; border: 2px solid white;" data-type="skin" data-color="0xffdfc4"></button>
+            <button class="color-btn" style="background-color: #cd9a5b; width: 40px; height: 40px; border-radius: 5px; cursor: pointer; border: 2px solid white;" data-type="skin" data-color="0xcd9a5b"></button>
+            <button class="color-btn" style="background-color: #8d5524; width: 40px; height: 40px; border-radius: 5px; cursor: pointer; border: 2px solid white;" data-type="skin" data-color="0x8d5524"></button>
+            <button class="color-btn" style="background-color: #4a3018; width: 40px; height: 40px; border-radius: 5px; cursor: pointer; border: 2px solid white;" data-type="skin" data-color="0x4a3018"></button>
+          </div>
+        </div>
+        <div style="margin-top: 20px;">
+          <label>Shirt Color:</label>
+          <div class="color-options" id="shirt-colors" style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="color-btn" style="background-color: #0f5e9c; width: 40px; height: 40px; border-radius: 5px; cursor: pointer; border: 2px solid white;" data-type="shirt" data-color="0x0f5e9c"></button>
+            <button class="color-btn" style="background-color: #c0392b; width: 40px; height: 40px; border-radius: 5px; cursor: pointer; border: 2px solid white;" data-type="shirt" data-color="0xc0392b"></button>
+            <button class="color-btn" style="background-color: #27ae60; width: 40px; height: 40px; border-radius: 5px; cursor: pointer; border: 2px solid white;" data-type="shirt" data-color="0x27ae60"></button>
+            <button class="color-btn" style="background-color: #8e44ad; width: 40px; height: 40px; border-radius: 5px; cursor: pointer; border: 2px solid white;" data-type="shirt" data-color="0x8e44ad"></button>
+            <button class="color-btn" style="background-color: #f39c12; width: 40px; height: 40px; border-radius: 5px; cursor: pointer; border: 2px solid white;" data-type="shirt" data-color="0xf39c12"></button>
+            <button class="color-btn" style="background-color: #2c3e50; width: 40px; height: 40px; border-radius: 5px; cursor: pointer; border: 2px solid white;" data-type="shirt" data-color="0x2c3e50"></button>
+          </div>
+        </div>
+      </div>
+      <button id="btn-cust-back" class="menu-btn primary">BACK</button>
     </div>
   </div>
 
