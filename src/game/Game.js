@@ -144,16 +144,21 @@ export class Game {
       if (this.world.environment.fallingTree) this.trollManager.register(new FallingTreeTroll(this.world.environment.fallingTree));
 
       if (this.world.terrain.parkourPlatforms) {
+        let consecutiveFalls = 0;
         this.world.terrain.parkourPlatforms.forEach((pData, index) => {
           // Never make the very first platform a troll platform so the player doesn't instantly die on spawn
           if (index < 2) return; 
 
           const rand = Math.random();
           // 20% chance to fall, 30% chance to move, 50% chance to be normal
-          if (rand > 0.8) {
+          if (rand > 0.8 && consecutiveFalls < 2) {
             this.trollManager.register(new ParkourTroll(pData.mesh));
+            consecutiveFalls++;
           } else if (rand > 0.5) {
             this.trollManager.register(new TrollPlatformTroll(pData.mesh));
+            consecutiveFalls = 0;
+          } else {
+            consecutiveFalls = 0;
           }
         });
       }
