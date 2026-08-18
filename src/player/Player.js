@@ -18,9 +18,9 @@ export class Player {
     // Materials
     this.skinMat = new THREE.MeshStandardMaterial({ color: 0xcd9a5b, roughness: 0.6, flatShading: true });
     this.shirtMat = new THREE.MeshStandardMaterial({ color: 0x0f5e9c, roughness: 0.7, flatShading: true });
-    const pantsMat = new THREE.MeshStandardMaterial({ color: 0x808080, roughness: 0.9, flatShading: true });
-    const hairMat = new THREE.MeshStandardMaterial({ color: 0x3d2010, roughness: 0.9, flatShading: true });
-    const shoeMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.8, flatShading: true });
+    this.pantsMat = new THREE.MeshStandardMaterial({ color: 0x808080, roughness: 0.9, flatShading: true });
+    this.hairMat = new THREE.MeshStandardMaterial({ color: 0x3d2010, roughness: 0.9, flatShading: true });
+    this.shoeMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.8, flatShading: true });
     const glassFrameMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5, flatShading: true });
     const glassLensMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2, flatShading: true, opacity: 0.8, transparent: true });
 
@@ -119,8 +119,8 @@ export class Player {
 
     // Legs
     this.legL = new THREE.Group();
-    const legLMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.07, 0.4, 16), pantsMat);
-    const shoeL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.1, 0.18), shoeMat);
+    const legLMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.07, 0.4, 16), this.pantsMat);
+    const shoeL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.1, 0.18), this.shoeMat);
     legLMesh.position.y = -0.2;
     shoeL.position.set(0, -0.45, 0.03);
     legLMesh.castShadow = true;
@@ -130,8 +130,8 @@ export class Player {
     this.visuals.add(this.legL);
 
     this.legR = new THREE.Group();
-    const legRMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.07, 0.4, 16), pantsMat);
-    const shoeR = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.1, 0.18), shoeMat);
+    const legRMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.07, 0.4, 16), this.pantsMat);
+    const shoeR = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.1, 0.18), this.shoeMat);
     legRMesh.position.y = -0.2;
     shoeR.position.set(0, -0.45, 0.03);
     legRMesh.castShadow = true;
@@ -149,7 +149,7 @@ export class Player {
     this.wasGrounded = false;
     this.moveSpeed = 6;
     this.sprintMultiplier = 2.2;
-    this.jumpForce = 8; // Lower jump force because gravity is lower
+    this.jumpForce = 12; // Adjust for snappier jump
     this.drag = 8;
     this.playerRadius = 0.35;
     this.playerHeight = 1.5; // total capsule height
