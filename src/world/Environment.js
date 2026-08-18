@@ -572,6 +572,7 @@ export class Environment {
 
     group.position.set(x, y, z);
     this.scene.add(group);
+    this.objects.push(group);
     
     // Create physics collider
     const collider = physics.addCollider(cup, 'solid', 'teacup_house');
@@ -607,6 +608,7 @@ export class Environment {
     
     group.position.set(x, y, z);
     this.scene.add(group);
+    this.objects.push(group);
     
     // Add point light to make it glow brightly
     const light = new THREE.PointLight(0xffd700, 3, 20);
