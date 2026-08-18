@@ -83,6 +83,14 @@ export class Environment {
         if (y === -Infinity) continue;
         this._addRock(x, y, z);
       }
+      
+      // Grass patches
+      for (let i = 0; i < 40; i++) {
+        const x = (Math.random() - 0.5) * 30;
+        const z = 5 - Math.random() * 110;
+        const y = physics.getGroundY(x, z);
+        if (y !== -Infinity) this._addGrassPatch(x, y, z);
+      }
 
       this._addSign(0, 0, -5, 'Walk toward the tree.\nIt\'s friendly. Probably.', 0);
       this._addSign(0, 0, -35, 'Left or Right?\nChoose wisely.', 0);
@@ -118,6 +126,14 @@ export class Environment {
         const y = physics.getGroundY(x, z);
         if (y === -Infinity) continue;
         this._addRock(x, y, z);
+      }
+
+      // Grass patches
+      for (let i = 0; i < 80; i++) {
+        const x = (Math.random() - 0.5) * 30;
+        const z = 5 - Math.random() * 240;
+        const y = physics.getGroundY(x, z);
+        if (y !== -Infinity) this._addGrassPatch(x, y, z);
       }
 
       this._addSign(2, 3, -38, '→ SAFE PATH', Math.PI / 8);
@@ -653,25 +669,79 @@ export class Environment {
   _addHammer(x, y, z) {
     const group = new THREE.Group();
     
-    // Handle
-    const handleGeo = new THREE.CylinderGeometry(0.2, 0.2, 6, 8);
-    const handleMat = new THREE.MeshStandardMaterial({ color: 0x8b4513, roughness: 0.9 });
+    // Wooden Handle
+    const handleGeo = new THREE.CylinderGeometry(0.15, 0.2, 6, 12);
+    const handleMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.9 }); // Dark wood
     const handle = new THREE.Mesh(handleGeo, handleMat);
     handle.position.y = -3; // Hangs down from pivot
     handle.castShadow = true;
     group.add(handle);
+
+    // Rubber Grip at the top (near the pivot)
+    const gripGeo = new THREE.CylinderGeometry(0.18, 0.18, 1.5, 12);
+    const gripMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8 });
+    const grip = new THREE.Mesh(gripGeo, gripMat);
+    grip.position.y = -0.75;
+    group.add(grip);
     
-    // Head
-    const headGeo = new THREE.BoxGeometry(2, 1.5, 1.5);
-    const headMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.6, roughness: 0.5 });
-    const head = new THREE.Mesh(headGeo, headMat);
-    head.position.y = -6; // At the bottom of the handle
-    head.castShadow = true;
-    group.add(head);
+    // Metal Head Center
+    const headMat = new THREE.MeshStandardMaterial({ color: 0x9aa5af, metalness: 0.7, roughness: 0.4 });
+    const centerGeo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+    const centerHead = new THREE.Mesh(centerGeo, headMat);
+    centerHead.position.y = -5.7; // At the bottom of the handle
+    centerHead.castShadow = true;
+    group.add(centerHead);
+
+    // Hammer Striking Faces (beveled ends)
+    const faceGeo = new THREE.CylinderGeometry(0.5, 0.6, 0.8, 8);
+    const face1 = new THREE.Mesh(faceGeo, headMat);
+    face1.rotation.z = Math.PI / 2;
+    face1.position.set(-0.9, -5.7, 0);
+    face1.castShadow = true;
+    group.add(face1);
+
+    const face2 = new THREE.Mesh(faceGeo, headMat);
+    face2.rotation.z = -Math.PI / 2;
+    face2.position.set(0.9, -5.7, 0);
+    face2.castShadow = true;
+    group.add(face2);
     
     group.position.set(x, y, z);
     this.scene.add(group);
     
+    return group;
+  }
+
+  _addGrassPatch(x, y, z) {
+    const group = new THREE.Group();
+    const grassMat = new THREE.MeshStandardMaterial({ color: 0x228b22, roughness: 0.9, flatShading: true });
+    
+    // Create 3 to 5 blades of grass
+    const numBlades = 3 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < numBlades; i++) {
+      // Blade geometry: very thin at top, wider at bottom
+      const height = 0.4 + Math.random() * 0.4;
+      const bladeGeo = new THREE.ConeGeometry(0.05, height, 4);
+      // Shift geometry so origin is at bottom
+      bladeGeo.translate(0, height / 2, 0);
+      
+      const blade = new THREE.Mesh(bladeGeo, grassMat);
+      
+      // Random position spread
+      blade.position.x = (Math.random() - 0.5) * 0.5;
+      blade.position.z = (Math.random() - 0.5) * 0.5;
+      
+      // Random rotation
+      blade.rotation.y = Math.random() * Math.PI * 2;
+      blade.rotation.x = (Math.random() - 0.5) * 0.3; // Slight bend
+      blade.rotation.z = (Math.random() - 0.5) * 0.3;
+      
+      blade.castShadow = true;
+      group.add(blade);
+    }
+    
+    group.position.set(x, y, z);
+    this.scene.add(group);
     return group;
   }
 }
