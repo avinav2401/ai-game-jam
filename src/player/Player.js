@@ -16,96 +16,125 @@ export class Player {
     this.visuals.position.y = -0.68; // Shift down so feet touch the ground
     
     // Materials
-    const skinMat = new THREE.MeshStandardMaterial({ color: 0xffdfc4, roughness: 0.6, flatShading: true });
-    const shirtMat = new THREE.MeshStandardMaterial({ color: 0x1565c0, roughness: 0.7, flatShading: true });
-    const pantsMat = new THREE.MeshStandardMaterial({ color: 0xd2b48c, roughness: 0.9, flatShading: true });
-    const hairMat = new THREE.MeshStandardMaterial({ color: 0x4a3018, roughness: 0.9, flatShading: true });
-    const shoeMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8, flatShading: true });
+    // Materials
+    const skinMat = new THREE.MeshStandardMaterial({ color: 0xcd9a5b, roughness: 0.6, flatShading: true });
+    const shirtMat = new THREE.MeshStandardMaterial({ color: 0x0f5e9c, roughness: 0.7, flatShading: true });
+    const pantsMat = new THREE.MeshStandardMaterial({ color: 0x808080, roughness: 0.9, flatShading: true });
+    const hairMat = new THREE.MeshStandardMaterial({ color: 0x3d2010, roughness: 0.9, flatShading: true });
+    const shoeMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.8, flatShading: true });
     const glassFrameMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5, flatShading: true });
     const glassLensMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2, flatShading: true, opacity: 0.8, transparent: true });
 
-    // Head (Large blocky)
+    // Head (Rounded/Oval)
     this.head = new THREE.Group();
-    const headMesh = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.6, 0.6), skinMat);
+    // Slightly flattened sphere
+    const headGeo = new THREE.SphereGeometry(0.35, 32, 32);
+    const headMesh = new THREE.Mesh(headGeo, skinMat);
+    headMesh.scale.set(1, 1.1, 0.9); 
     headMesh.castShadow = true;
     this.head.add(headMesh);
     
-    // Hair
-    const hairMesh = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.2, 0.65), hairMat);
-    hairMesh.position.y = 0.35;
+    // Hair (Puffy/Afro sphere)
+    const hairGeo = new THREE.SphereGeometry(0.4, 32, 32);
+    const hairMesh = new THREE.Mesh(hairGeo, hairMat);
+    hairMesh.position.set(0, 0.1, -0.05);
+    hairMesh.scale.set(1.0, 0.9, 1.0);
     hairMesh.castShadow = true;
     this.head.add(hairMesh);
 
     // Glasses
-    const frameGeo = new THREE.BoxGeometry(0.26, 0.16, 0.05);
-    const lensGeo = new THREE.BoxGeometry(0.2, 0.1, 0.06);
+    const frameGeo = new THREE.BoxGeometry(0.24, 0.12, 0.04);
+    const lensGeo = new THREE.BoxGeometry(0.18, 0.08, 0.05);
     
     const leftFrame = new THREE.Mesh(frameGeo, glassFrameMat);
-    leftFrame.position.set(-0.16, 0.05, 0.31);
+    leftFrame.position.set(-0.14, 0.05, 0.32);
+    leftFrame.rotation.y = -0.15;
     const leftLens = new THREE.Mesh(lensGeo, glassLensMat);
-    leftLens.position.set(-0.16, 0.05, 0.31);
+    leftLens.position.set(-0.14, 0.05, 0.32);
+    leftLens.rotation.y = -0.15;
     
     const rightFrame = new THREE.Mesh(frameGeo, glassFrameMat);
-    rightFrame.position.set(0.16, 0.05, 0.31);
+    rightFrame.position.set(0.14, 0.05, 0.32);
+    rightFrame.rotation.y = 0.15;
     const rightLens = new THREE.Mesh(lensGeo, glassLensMat);
-    rightLens.position.set(0.16, 0.05, 0.31);
+    rightLens.position.set(0.14, 0.05, 0.32);
+    rightLens.rotation.y = 0.15;
     
-    const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.04, 0.05), glassFrameMat);
-    bridge.position.set(0, 0.05, 0.31);
+    const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.03, 0.04), glassFrameMat);
+    bridge.position.set(0, 0.05, 0.34);
 
     this.head.add(leftFrame, leftLens, rightFrame, rightLens, bridge);
+
+    // Mouth (Frown)
+    const mouthMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const mouthGeo = new THREE.BoxGeometry(0.08, 0.015, 0.02);
+    const mouth = new THREE.Mesh(mouthGeo, mouthMat);
+    mouth.position.set(0, -0.12, 0.31);
+    mouth.rotation.z = Math.PI; // Optional, it's a box so frown can just be slightly angled
+    // To make it look like a frown, tilt two small boxes
+    const mouthL = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.015, 0.02), mouthMat);
+    mouthL.position.set(-0.02, -0.13, 0.31);
+    mouthL.rotation.z = -0.2;
+    const mouthR = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.015, 0.02), mouthMat);
+    mouthR.position.set(0.02, -0.13, 0.31);
+    mouthR.rotation.z = 0.2;
+    this.head.add(mouthL, mouthR);
     
-    this.head.position.y = 1.3;
+    this.head.position.y = 1.25;
     this.visuals.add(this.head);
 
-    // Body (Shirt) - Blocky
-    this.body = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.5, 0.3), shirtMat);
+    // Body (Shirt) - Rounded
+    this.body = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.22, 0.45, 16), shirtMat);
     this.body.position.y = 0.75;
     this.body.castShadow = true;
     this.visuals.add(this.body);
 
     // Arms
     this.armL = new THREE.Group();
-    const armLMesh = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.4, 0.15), skinMat);
-    const sleeveL = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.25, 0.16), shirtMat);
-    armLMesh.position.y = -0.2;
-    sleeveL.position.y = -0.1;
+    const armLMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.3, 16), shirtMat);
+    armLMesh.position.y = -0.15;
+    const handL = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 16), skinMat);
+    handL.position.y = -0.32;
     armLMesh.castShadow = true;
-    this.armL.add(armLMesh, sleeveL);
-    this.armL.position.set(-0.32, 1.0, 0);
+    handL.castShadow = true;
+    this.armL.add(armLMesh, handL);
+    this.armL.position.set(-0.28, 0.9, 0);
+    this.armL.rotation.z = -0.1; // Rest slightly angled outward
     this.visuals.add(this.armL);
 
     this.armR = new THREE.Group();
-    const armRMesh = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.4, 0.15), skinMat);
-    const sleeveR = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.25, 0.16), shirtMat);
-    armRMesh.position.y = -0.2;
-    sleeveR.position.y = -0.1;
+    const armRMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.3, 16), shirtMat);
+    armRMesh.position.y = -0.15;
+    const handR = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 16), skinMat);
+    handR.position.y = -0.32;
     armRMesh.castShadow = true;
-    this.armR.add(armRMesh, sleeveR);
-    this.armR.position.set(0.32, 1.0, 0);
+    handR.castShadow = true;
+    this.armR.add(armRMesh, handR);
+    this.armR.position.set(0.28, 0.9, 0);
+    this.armR.rotation.z = 0.1; // Rest slightly angled outward
     this.visuals.add(this.armR);
 
     // Legs
     this.legL = new THREE.Group();
-    const legLMesh = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.4, 0.18), pantsMat);
-    const shoeL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.15, 0.25), shoeMat);
+    const legLMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.07, 0.4, 16), pantsMat);
+    const shoeL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.1, 0.18), shoeMat);
     legLMesh.position.y = -0.2;
     shoeL.position.set(0, -0.45, 0.03);
     legLMesh.castShadow = true;
     shoeL.castShadow = true;
     this.legL.add(legLMesh, shoeL);
-    this.legL.position.set(-0.12, 0.5, 0);
+    this.legL.position.set(-0.1, 0.5, 0);
     this.visuals.add(this.legL);
 
     this.legR = new THREE.Group();
-    const legRMesh = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.4, 0.18), pantsMat);
-    const shoeR = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.15, 0.25), shoeMat);
+    const legRMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.07, 0.4, 16), pantsMat);
+    const shoeR = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.1, 0.18), shoeMat);
     legRMesh.position.y = -0.2;
     shoeR.position.set(0, -0.45, 0.03);
     legRMesh.castShadow = true;
     shoeR.castShadow = true;
     this.legR.add(legRMesh, shoeR);
-    this.legR.position.set(0.12, 0.5, 0);
+    this.legR.position.set(0.1, 0.5, 0);
     this.visuals.add(this.legR);
 
     this.mesh.position.set(0, 2, 0);

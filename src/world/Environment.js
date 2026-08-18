@@ -239,44 +239,61 @@ export class Environment {
 
   _addTree(x, y, z) {
     const group = new THREE.Group();
-    // Trunk
-    const trunkGeo = new THREE.CylinderGeometry(0.2, 0.3, 1.0, 5);
+    // Trunk - base is at Y=0 (so it rests exactly on the ground, growing upwards)
+    const trunkGeo = new THREE.CylinderGeometry(0.2, 0.3, 1.2, 5);
+    // Shift geometry so the origin is at the bottom center of the trunk
+    trunkGeo.translate(0, 0.6, 0); 
     const trunk = new THREE.Mesh(trunkGeo, this.treeTrunkMat);
-    trunk.position.y = 0.5;
     trunk.castShadow = true;
     group.add(trunk);
 
-    // Foliage (Puffy low-poly spheres)
-    const puffGeo = new THREE.IcosahedronGeometry(1.2, 0); // Flat shading makes it look low-poly
+    // Randomly pick between puffy tree (low poly spheres) or pine tree (layered cones)
+    if (Math.random() > 0.5) {
+      // Puffy low-poly tree
+      const puffGeo = new THREE.IcosahedronGeometry(1.2, 0); 
+      
+      const puff1 = new THREE.Mesh(puffGeo, this.treeLeavesMat);
+      puff1.position.set(0, 1.8, 0);
+      puff1.scale.set(1.2, 1, 1.2);
+      puff1.castShadow = true;
+      group.add(puff1);
 
-    const puff1 = new THREE.Mesh(puffGeo, this.treeLeavesMat);
-    puff1.position.set(0, 1.8, 0);
-    puff1.scale.set(1.2, 1, 1.2);
-    puff1.castShadow = true;
-    group.add(puff1);
+      const puff2 = new THREE.Mesh(puffGeo, this.treeLeavesMat);
+      puff2.position.set(0.6, 2.3, -0.2);
+      puff2.scale.set(0.9, 0.9, 0.9);
+      puff2.castShadow = true;
+      group.add(puff2);
 
-    const puff2 = new THREE.Mesh(puffGeo, this.treeLeavesMat);
-    puff2.position.set(0.6, 2.3, -0.2);
-    puff2.scale.set(0.9, 0.9, 0.9);
-    puff2.castShadow = true;
-    group.add(puff2);
+      const puff3 = new THREE.Mesh(puffGeo, this.treeLeavesMat);
+      puff3.position.set(-0.5, 2.2, 0.4);
+      puff3.scale.set(0.8, 0.8, 0.8);
+      puff3.castShadow = true;
+      group.add(puff3);
+    } else {
+      // Pine tree (cones)
+      const cone1 = new THREE.Mesh(new THREE.ConeGeometry(1.5, 2.0, 5), this.treeLeavesMat);
+      cone1.position.y = 1.5;
+      cone1.castShadow = true;
+      group.add(cone1);
 
-    const puff3 = new THREE.Mesh(puffGeo, this.treeLeavesMat);
-    puff3.position.set(-0.5, 2.2, 0.4);
-    puff3.scale.set(0.8, 0.8, 0.8);
-    puff3.castShadow = true;
-    group.add(puff3);
+      const cone2 = new THREE.Mesh(new THREE.ConeGeometry(1.2, 1.8, 5), this.treeLeavesMat);
+      cone2.position.y = 2.5;
+      cone2.castShadow = true;
+      group.add(cone2);
 
-    const puff4 = new THREE.Mesh(puffGeo, this.treeLeavesMat);
-    puff4.position.set(0, 3.0, 0);
-    puff4.scale.set(0.9, 0.9, 0.9);
-    puff4.castShadow = true;
-    group.add(puff4);
+      const cone3 = new THREE.Mesh(new THREE.ConeGeometry(0.9, 1.5, 5), this.treeLeavesMat);
+      cone3.position.y = 3.5;
+      cone3.castShadow = true;
+      group.add(cone3);
+    }
 
+    // group.position.set places the bottom of the trunk exactly at (x, y, z)
     group.position.set(x, y, z);
     this.scene.add(group);
+    
     this.objects.push(group);
     this.trees.push(group);
+    return group;
   }
 
   _addRock(x, y, z) {
