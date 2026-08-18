@@ -61,9 +61,9 @@ export class Environment {
     this.treeTrunkMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.9, flatShading: true });
     
     // Pine tree material
-    this.pineLeavesMat = new THREE.MeshStandardMaterial({ color: 0x1f4728, roughness: 0.9, flatShading: true });
+    this.pineLeavesMat = new THREE.MeshStandardMaterial({ color: 0x3a7c46, roughness: 0.9, flatShading: true });
     // Leafy tree material
-    this.puffLeavesMat = new THREE.MeshStandardMaterial({ color: 0x2d5a27, roughness: 0.8, flatShading: true });
+    this.puffLeavesMat = new THREE.MeshStandardMaterial({ color: 0x439c4e, roughness: 0.8, flatShading: true });
     
     this.waterMat = new THREE.MeshPhysicalMaterial({ color: 0x0077be, transparent: true, opacity: 0.6, roughness: 0.1, metalness: 0.1 });
 
@@ -293,7 +293,7 @@ export class Environment {
       for (let i = 0; i < layers; i++) {
         const radius = 1.6 - (i * 0.25);
         const height = 1.8;
-        const yPos = 1.2 + (i * 0.7);
+        const yPos = 1.8 + (i * 0.6); // Raised slightly to show trunk at the bottom
         const cone = new THREE.Mesh(new THREE.ConeGeometry(radius, height, 6), this.pineLeavesMat);
         cone.position.y = yPos;
         // slightly tilt some layers for realism
@@ -709,7 +709,7 @@ export class Environment {
 
     // Leaves
     const puffGeo = new THREE.IcosahedronGeometry(1.5, 0);
-    const puff = new THREE.Mesh(puffGeo, this.treeLeavesMat);
+    const puff = new THREE.Mesh(puffGeo, this.pineLeavesMat);
     puff.position.y = 3.5;
     puff.castShadow = true;
     group.add(puff);
