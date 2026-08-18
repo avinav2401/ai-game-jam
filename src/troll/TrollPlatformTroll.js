@@ -5,45 +5,68 @@ import { physics } from '../systems/Physics.js';
 export class TrollPlatformTroll extends BaseTroll {
   constructor(mesh) {
     super('troll_platform', {
-      triggerDistance: 1000, // Always active
+      triggerDistance: 15,
       triggerPosition: mesh.position.clone(),
-      oneShot: false
+      oneShot: true
     });
     this.mesh = mesh;
     this.initialX = mesh.position.x;
-    this.timer = Math.random() * Math.PI * 2; // Random starting phase
-    this.active = true;
-    this.amplitude = 5 + Math.random() * 3; // 5 to 8 units range
-    this.speed = 1.5 + Math.random() * 1.5; // 1.5 to 3.0 rad/s
+    
+    // Choose a random direction to move (left or right)
+    this.direction = Math.random() > 0.5 ? 1 : -1;
+    this.moveDistance = 4; // Shift by 4 units
+    this.targetX = this.initialX + (this.direction * this.moveDistance);
+    this.speed = 15; // Move very fast (units per second)
+    
+    this.hasMoved = false;
     
     // Find physics collider ID to update it
     this.colliderEntry = physics.colliders.find(c => c.mesh === mesh);
   }
 
   shouldTrigger(playerPos) {
-    return true; // Always updating while in the level
+    // Only trigger if we are close (handled by BaseTroll triggerDistance)
+    // We check the jumping condition in onUpdate since shouldTrigger doesn't get 'game'
+    return super.shouldTrigger(playerPos);
   }
 
   onTrigger(game) {
-    // No one-shot effect, handled in onUpdate
+    // The player is close, but we wait for them to jump!
   }
 
   onUpdate(dt, game) {
-    // The Troll: The platform freezes its movement when the player is mid-air!
-    if (game.player.grounded) {
-      this.timer += dt * this.speed;
+    if (!this.active) return; // Only active if close enough
+
+    // Wait for the player to jump (be in the air) before moving
+    if (!this.hasMoved && !game.player.grounded) {
+      this.hasMoved = true;
     }
 
-    // Move left and right
-    this.mesh.position.x = this.initialX + Math.sin(this.timer) * this.amplitude;
-    
-    // Update physics collider
-    if (this.colliderEntry) {
-      physics.updateColliderFromMesh(this.colliderEntry);
+    // Move the platform to targetX quickly once triggered
+    if (this.hasMoved) {
+      if (this.mesh.position.x !== this.targetX) {
+        // Move towards targetX
+        const dir = Math.sign(this.targetX - this.mesh.position.x);
+        this.mesh.position.x += dir * this.speed * dt;
+        
+        // If we overshot, snap to target
+        if (dir > 0 && this.mesh.position.x > this.targetX) this.mesh.position.x = this.targetX;
+        if (dir < 0 && this.mesh.position.x < this.targetX) this.mesh.position.x = this.targetX;
+        
+        // Update physics collider
+        if (this.colliderEntry) {
+          physics.updateColliderFromMesh(this.colliderEntry);
+        }
+      }
     }
   }
 
   onReset() {
-    // Keep phase is fine.
+    this.hasMoved = false;
+    this.mesh.position.x = this.initialX;
+    this.active = false;
+    if (this.colliderEntry) {
+      physics.updateColliderFromMesh(this.colliderEntry);
+    }
   }
 }
