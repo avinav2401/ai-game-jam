@@ -11,7 +11,6 @@ import { FakeCheckpointTroll } from '../troll/FakeCheckpointTroll.js';
 import { RunningCoinTroll } from '../troll/RunningCoinTroll.js';
 import { LyingNPCTroll } from '../troll/LyingNPCTroll.js';
 import { GunTreeTroll } from '../troll/GunTreeTroll.js';
-import { GunTreeTroll } from '../troll/GunTreeTroll.js';
 import { ButtonTrapTroll } from '../troll/ButtonTrapTroll.js';
 import { LadderTroll } from '../troll/LadderTroll.js';
 import { FallingTreeTroll } from '../troll/FallingTreeTroll.js';
