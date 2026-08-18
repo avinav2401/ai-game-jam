@@ -59,6 +59,7 @@ export class Environment {
     this.grassMat = new THREE.MeshStandardMaterial({ color: 0x4ade80, roughness: 0.8, flatShading: true });
     this.rockMat = new THREE.MeshStandardMaterial({ color: 0x8b8c89, roughness: 0.9, flatShading: true });
     this.treeTrunkMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.9, flatShading: true });
+    this.bushMat = new THREE.MeshStandardMaterial({ color: 0x66cc33, roughness: 0.9, flatShading: true });
     
     // Pine tree material
     this.pineLeavesMat = new THREE.MeshStandardMaterial({ color: 0x3a7c46, roughness: 0.9, flatShading: true });
@@ -108,8 +109,8 @@ export class Environment {
 
       // The Fork in the road trolls
       // Left path trap tree (spawn beside the path so it falls ONTO it)
-      this.trapTree = this._addFallingTree(-12, 0, -55);
-      this.safeTree = this._addTree(8, 0, -55);
+      this.trapTree = this._addFallingTree(-10, 1, -55);
+      this.safeTree = this._addTree(8, 1, -55);
       
       this.house = this._addTeacupHouse(0, 5.5, -225);
       this.key = this._addHouseKey(0, 6.5, -218);
