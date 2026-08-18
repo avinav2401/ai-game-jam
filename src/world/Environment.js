@@ -56,10 +56,10 @@ export class Environment {
 
   build(checkpointMgr, currentLevel = 1) {
     // Materials
-    this.treeTrunkMat = new THREE.MeshStandardMaterial({ color: 0x5a3e2b, roughness: 0.9, flatShading: false });
-    this.treeLeavesMat = new THREE.MeshStandardMaterial({ color: 0x2d5a27, roughness: 0.8, flatShading: false });
-    this.rockMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.8, flatShading: false });
-    this.bushMat = new THREE.MeshStandardMaterial({ color: 0x3d7a37, roughness: 0.9, flatShading: false });
+    this.treeTrunkMat = new THREE.MeshStandardMaterial({ color: 0x5a3e2b, roughness: 0.9, flatShading: true });
+    this.treeLeavesMat = new THREE.MeshStandardMaterial({ color: 0x4caf50, roughness: 0.8, flatShading: true });
+    this.rockMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.8, flatShading: true });
+    this.bushMat = new THREE.MeshStandardMaterial({ color: 0x66cc33, roughness: 0.9, flatShading: true });
 
     // Spawn point for both levels
     checkpointMgr.addCheckpoint('cp0', new THREE.Vector3(0, 1, 0), null);
@@ -246,24 +246,32 @@ export class Environment {
     trunk.castShadow = true;
     group.add(trunk);
 
-    // Pine needles (layered cones)
-    // Bottom layer
-    const cone1 = new THREE.Mesh(new THREE.ConeGeometry(1.5, 2.0, 5), this.treeLeavesMat);
-    cone1.position.y = 1.5;
-    cone1.castShadow = true;
-    group.add(cone1);
+    // Foliage (Puffy low-poly spheres)
+    const puffGeo = new THREE.IcosahedronGeometry(1.2, 0); // Flat shading makes it look low-poly
 
-    // Middle layer
-    const cone2 = new THREE.Mesh(new THREE.ConeGeometry(1.2, 1.8, 5), this.treeLeavesMat);
-    cone2.position.y = 2.5;
-    cone2.castShadow = true;
-    group.add(cone2);
+    const puff1 = new THREE.Mesh(puffGeo, this.treeLeavesMat);
+    puff1.position.set(0, 1.8, 0);
+    puff1.scale.set(1.2, 1, 1.2);
+    puff1.castShadow = true;
+    group.add(puff1);
 
-    // Top layer
-    const cone3 = new THREE.Mesh(new THREE.ConeGeometry(0.9, 1.5, 5), this.treeLeavesMat);
-    cone3.position.y = 3.5;
-    cone3.castShadow = true;
-    group.add(cone3);
+    const puff2 = new THREE.Mesh(puffGeo, this.treeLeavesMat);
+    puff2.position.set(0.6, 2.3, -0.2);
+    puff2.scale.set(0.9, 0.9, 0.9);
+    puff2.castShadow = true;
+    group.add(puff2);
+
+    const puff3 = new THREE.Mesh(puffGeo, this.treeLeavesMat);
+    puff3.position.set(-0.5, 2.2, 0.4);
+    puff3.scale.set(0.8, 0.8, 0.8);
+    puff3.castShadow = true;
+    group.add(puff3);
+
+    const puff4 = new THREE.Mesh(puffGeo, this.treeLeavesMat);
+    puff4.position.set(0, 3.0, 0);
+    puff4.scale.set(0.9, 0.9, 0.9);
+    puff4.castShadow = true;
+    group.add(puff4);
 
     group.position.set(x, y, z);
     this.scene.add(group);

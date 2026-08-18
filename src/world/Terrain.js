@@ -10,13 +10,13 @@ export class Terrain {
     
     // Materials
     this.grassMat = new THREE.MeshStandardMaterial({
-      color: 0x4caf50, // brighter green
+      color: 0x7ec850, // vibrant green
       roughness: 0.8,
       flatShading: true,
     });
 
     this.dirtMat = new THREE.MeshStandardMaterial({
-      color: 0x8d6e63, // light brown/rocky
+      color: 0x8c6b5d, // warm grey-brown rock
       roughness: 0.9,
       flatShading: true,
     });
@@ -24,6 +24,18 @@ export class Terrain {
     this.pathMat = new THREE.MeshStandardMaterial({
       color: 0xaaaaaa, // stone path
       roughness: 0.9,
+      flatShading: true,
+    });
+
+    this.woodMat = new THREE.MeshStandardMaterial({
+      color: 0x8b5a2b, // wooden planks
+      roughness: 0.9,
+      flatShading: true,
+    });
+
+    this.stoneMat = new THREE.MeshStandardMaterial({
+      color: 0x777777, // stone rails
+      roughness: 0.8,
       flatShading: true,
     });
 
@@ -288,10 +300,10 @@ export class Terrain {
       const stepY = yStart + (i * stepHeight);
       const stepZ = startZ - (i * stepDepth);
       
+      // Wooden tread
       const geo = new THREE.BoxGeometry(width, Math.abs(stepHeight), stepDepth);
-      const mesh = new THREE.Mesh(geo, this.pathMat);
+      const mesh = new THREE.Mesh(geo, this.woodMat);
       
-      // Position the step. If stepHeight is negative, it goes down.
       mesh.position.set(x, stepY + (stepHeight / 2), stepZ);
       mesh.receiveShadow = true;
       mesh.castShadow = true;
@@ -300,6 +312,25 @@ export class Terrain {
       this.grounds.push(mesh);
       this.objects.push(mesh);
       physics.addCollider(mesh, 'solid', `stair_${x}_${stepY}_${stepZ}`);
+
+      // Stone rail left
+      const railGeo = new THREE.BoxGeometry(0.4, Math.abs(stepHeight) + 0.5, stepDepth);
+      const railL = new THREE.Mesh(railGeo, this.stoneMat);
+      railL.position.set(x - width/2 - 0.2, stepY + (stepHeight / 2) + 0.25, stepZ);
+      railL.receiveShadow = true;
+      railL.castShadow = true;
+      this.scene.add(railL);
+      this.objects.push(railL);
+      physics.addCollider(railL, 'solid', `railL_${x}_${stepY}_${stepZ}`);
+
+      // Stone rail right
+      const railR = new THREE.Mesh(railGeo, this.stoneMat);
+      railR.position.set(x + width/2 + 0.2, stepY + (stepHeight / 2) + 0.25, stepZ);
+      railR.receiveShadow = true;
+      railR.castShadow = true;
+      this.scene.add(railR);
+      this.objects.push(railR);
+      physics.addCollider(railR, 'solid', `railR_${x}_${stepY}_${stepZ}`);
     }
   }
 
@@ -324,36 +355,60 @@ export class Terrain {
     this.grounds.push(mesh);
     
     // Add some grass tufts on top
-    this._addGrassTufts(x, y + 1, z, w, d);
+    this._addDecorations(x, y + 1, z, w, d);
     
     return mesh;
   }
   
-  _addGrassTufts(x, y, z, w, d) {
-    const tuftCount = Math.floor(w * d / 2);
-    const geo = new THREE.ConeGeometry(0.1, 0.4, 3);
-    geo.translate(0, 0.2, 0);
-    const mat = new THREE.MeshStandardMaterial({ color: 0x5cd65c, flatShading: true });
+  _addDecorations(x, y, z, w, d) {
+    // Add low-poly bushes
+    const bushCount = Math.floor((w * d) / 15); // Sparse bushes
+    const bushGeo = new THREE.IcosahedronGeometry(0.8, 0); // Low poly sphere
+    bushGeo.translate(0, 0.6, 0); // Rest on ground
+    const bushMat = new THREE.MeshStandardMaterial({ color: 0x66cc33, flatShading: true });
     
-    const instancedMesh = new THREE.InstancedMesh(geo, mat, tuftCount);
-    const dummy = new THREE.Object3D();
-    
-    for (let i = 0; i < tuftCount; i++) {
-      dummy.position.set(
-        x + (Math.random() - 0.5) * w * 0.8,
-        y,
-        z + (Math.random() - 0.5) * d * 0.8
-      );
-      dummy.rotation.y = Math.random() * Math.PI;
-      dummy.rotation.z = (Math.random() - 0.5) * 0.4;
-      dummy.rotation.x = (Math.random() - 0.5) * 0.4;
-      dummy.scale.setScalar(0.5 + Math.random() * 0.8);
-      dummy.updateMatrix();
-      instancedMesh.setMatrixAt(i, dummy.matrix);
+    if (bushCount > 0) {
+      const instancedBushes = new THREE.InstancedMesh(bushGeo, bushMat, bushCount);
+      const dummy = new THREE.Object3D();
+      for (let i = 0; i < bushCount; i++) {
+        dummy.position.set(
+          x + (Math.random() - 0.5) * w * 0.8,
+          y,
+          z + (Math.random() - 0.5) * d * 0.8
+        );
+        dummy.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+        dummy.scale.setScalar(0.7 + Math.random() * 0.8);
+        dummy.updateMatrix();
+        instancedBushes.setMatrixAt(i, dummy.matrix);
+      }
+      instancedBushes.castShadow = true;
+      this.scene.add(instancedBushes);
+      this.objects.push(instancedBushes);
     }
-    
-    instancedMesh.castShadow = true;
-    this.scene.add(instancedMesh);
-    this.objects.push(instancedMesh);
+
+    // Add low-poly rocks
+    const rockCount = Math.floor((w * d) / 25);
+    const rockGeo = new THREE.IcosahedronGeometry(0.5, 0);
+    rockGeo.translate(0, 0.3, 0);
+    const rockMat = new THREE.MeshStandardMaterial({ color: 0x888888, flatShading: true });
+
+    if (rockCount > 0) {
+      const instancedRocks = new THREE.InstancedMesh(rockGeo, rockMat, rockCount);
+      const dummy2 = new THREE.Object3D();
+      for (let i = 0; i < rockCount; i++) {
+        dummy2.position.set(
+          x + (Math.random() - 0.5) * w * 0.8,
+          y,
+          z + (Math.random() - 0.5) * d * 0.8
+        );
+        dummy2.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+        dummy2.scale.setScalar(0.5 + Math.random() * 0.6);
+        dummy2.updateMatrix();
+        instancedRocks.setMatrixAt(i, dummy2.matrix);
+      }
+      instancedRocks.castShadow = true;
+      this.scene.add(instancedRocks);
+      this.objects.push(instancedRocks);
+    }
   }
 }
