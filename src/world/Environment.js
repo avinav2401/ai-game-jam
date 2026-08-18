@@ -249,40 +249,46 @@ export class Environment {
 
     // Randomly pick between puffy tree (low poly spheres) or pine tree (layered cones)
     if (Math.random() > 0.5) {
-      // Puffy low-poly tree
-      const puffGeo = new THREE.IcosahedronGeometry(1.2, 0); 
+      // Leafy low-poly tree
+      const puffGeo = new THREE.DodecahedronGeometry(1.0, 0); 
       
       const puff1 = new THREE.Mesh(puffGeo, this.treeLeavesMat);
-      puff1.position.set(0, 1.8, 0);
-      puff1.scale.set(1.2, 1, 1.2);
+      puff1.position.set(0, 2.0, 0);
+      puff1.scale.set(1.4, 1.2, 1.4);
       puff1.castShadow = true;
       group.add(puff1);
 
       const puff2 = new THREE.Mesh(puffGeo, this.treeLeavesMat);
-      puff2.position.set(0.6, 2.3, -0.2);
+      puff2.position.set(0.8, 2.4, -0.4);
       puff2.scale.set(0.9, 0.9, 0.9);
       puff2.castShadow = true;
       group.add(puff2);
 
       const puff3 = new THREE.Mesh(puffGeo, this.treeLeavesMat);
-      puff3.position.set(-0.5, 2.2, 0.4);
-      puff3.scale.set(0.8, 0.8, 0.8);
+      puff3.position.set(-0.7, 2.3, 0.6);
+      puff3.scale.set(1.0, 0.8, 1.0);
       puff3.castShadow = true;
       group.add(puff3);
+      
+      const puff4 = new THREE.Mesh(puffGeo, this.treeLeavesMat);
+      puff4.position.set(0.2, 2.8, 0.4);
+      puff4.scale.set(0.8, 0.8, 0.8);
+      puff4.castShadow = true;
+      group.add(puff4);
     } else {
       // Pine tree (cones)
-      const cone1 = new THREE.Mesh(new THREE.ConeGeometry(1.5, 2.0, 5), this.treeLeavesMat);
-      cone1.position.y = 1.5;
+      const cone1 = new THREE.Mesh(new THREE.ConeGeometry(1.6, 2.0, 6), this.treeLeavesMat);
+      cone1.position.y = 1.4;
       cone1.castShadow = true;
       group.add(cone1);
 
-      const cone2 = new THREE.Mesh(new THREE.ConeGeometry(1.2, 1.8, 5), this.treeLeavesMat);
-      cone2.position.y = 2.5;
+      const cone2 = new THREE.Mesh(new THREE.ConeGeometry(1.3, 1.8, 6), this.treeLeavesMat);
+      cone2.position.y = 2.2;
       cone2.castShadow = true;
       group.add(cone2);
 
-      const cone3 = new THREE.Mesh(new THREE.ConeGeometry(0.9, 1.5, 5), this.treeLeavesMat);
-      cone3.position.y = 3.5;
+      const cone3 = new THREE.Mesh(new THREE.ConeGeometry(0.9, 1.5, 6), this.treeLeavesMat);
+      cone3.position.y = 3.1;
       cone3.castShadow = true;
       group.add(cone3);
     }

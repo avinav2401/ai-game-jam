@@ -87,7 +87,7 @@ export class Player {
     this.visuals.add(this.head);
 
     // Body (Shirt) - Rounded
-    this.body = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.22, 0.45, 16), this.shirtMat);
+    this.body = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.22, 0.5, 16), this.shirtMat);
     this.body.position.y = 0.75;
     this.body.castShadow = true;
     this.visuals.add(this.body);
@@ -101,7 +101,7 @@ export class Player {
     armLMesh.castShadow = true;
     handL.castShadow = true;
     this.armL.add(armLMesh, handL);
-    this.armL.position.set(-0.28, 0.9, 0);
+    this.armL.position.set(-0.25, 0.9, 0);
     this.armL.rotation.z = -0.1; // Rest slightly angled outward
     this.visuals.add(this.armL);
 
@@ -113,7 +113,7 @@ export class Player {
     armRMesh.castShadow = true;
     handR.castShadow = true;
     this.armR.add(armRMesh, handR);
-    this.armR.position.set(0.28, 0.9, 0);
+    this.armR.position.set(0.25, 0.9, 0);
     this.armR.rotation.z = 0.1; // Rest slightly angled outward
     this.visuals.add(this.armR);
 
@@ -126,7 +126,7 @@ export class Player {
     legLMesh.castShadow = true;
     shoeL.castShadow = true;
     this.legL.add(legLMesh, shoeL);
-    this.legL.position.set(-0.1, 0.5, 0);
+    this.legL.position.set(-0.11, 0.5, 0);
     this.visuals.add(this.legL);
 
     this.legR = new THREE.Group();
@@ -137,7 +137,7 @@ export class Player {
     legRMesh.castShadow = true;
     shoeR.castShadow = true;
     this.legR.add(legRMesh, shoeR);
-    this.legR.position.set(0.1, 0.5, 0);
+    this.legR.position.set(0.11, 0.5, 0);
     this.visuals.add(this.legR);
 
     this.mesh.position.set(0, 2, 0);
