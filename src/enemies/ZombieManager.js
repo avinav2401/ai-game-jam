@@ -23,7 +23,7 @@ export class ZombieManager {
     const playerPos = player.getPosition();
     
     for (const zombie of this.zombies) {
-      zombie.update(dt, playerPos);
+      zombie.update(dt, playerPos, player.hasGun);
       
       // Check collision with player
       if (!zombie.isDead && !player.isDead) {

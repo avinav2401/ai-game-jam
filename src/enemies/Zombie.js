@@ -88,14 +88,14 @@ export class Zombie {
     });
   }
 
-  update(dt, playerPos) {
+  update(dt, playerPos, canChase) {
     if (this.isDead) return;
     
     // Calculate distance to player
     const dist = this.mesh.position.distanceTo(playerPos);
     
-    // Only chase if player is within range (e.g. 50 units)
-    if (dist < 50 && dist > 1.0) {
+    // Only chase if player is within range AND has the gun
+    if (canChase && dist < 50 && dist > 1.0) {
       // Look at player
       const targetPos = playerPos.clone();
       targetPos.y = this.mesh.position.y; // keep level
@@ -113,10 +113,18 @@ export class Zombie {
         this.mesh.position.y = groundY;
       }
       
-      // Walk animation
-      this.walkTime += dt * 8;
-      this.legL.position.y = 0.25 + Math.sin(this.walkTime) * 0.1;
-      this.legR.position.y = 0.25 + Math.sin(this.walkTime + Math.PI) * 0.1;
+      // Animation (waddle)
+      this.walkTime += dt * 5;
+      this.armL.rotation.x = Math.sin(this.walkTime) * 0.5;
+      this.armR.rotation.x = -Math.sin(this.walkTime) * 0.5;
+      this.legL.rotation.x = -Math.sin(this.walkTime) * 0.5;
+      this.legR.rotation.x = Math.sin(this.walkTime) * 0.5;
+    } else {
+      // Just apply gravity to stay on ground if not chasing
+      const groundY = physics.getGroundY(this.mesh.position.x, this.mesh.position.z);
+      if (groundY !== -Infinity) {
+        this.mesh.position.y = groundY;
+      }
     }
   }
 
