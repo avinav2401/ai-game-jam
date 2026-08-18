@@ -211,6 +211,7 @@ export class Terrain {
     this.grounds = [];
     this.objects = [];
     this.parkourPlatforms = [];
+    this.hasShuffledParkour = false;
   }
 
   _addParkourPlatform(x, y, z, w, d) {
@@ -237,8 +238,15 @@ export class Terrain {
   }
   
   shuffleParkourPlatforms() {
-    for (const plat of this.parkourPlatforms) {
-      // Pick -4, 0, or 4 randomly (spread it out so it's a tricky jump)
+    if (this.hasShuffledParkour) return; // Only move once!
+    this.hasShuffledParkour = true;
+    
+    // Pick 2 random platforms to move
+    const numToMove = Math.min(2, this.parkourPlatforms.length);
+    const shuffled = [...this.parkourPlatforms].sort(() => 0.5 - Math.random());
+    
+    for (let i = 0; i < numToMove; i++) {
+      const plat = shuffled[i];
       const sides = [-4, 0, 4];
       const newX = sides[Math.floor(Math.random() * sides.length)];
       plat.mesh.userData.targetX = newX;
@@ -255,9 +263,7 @@ export class Terrain {
         
         // Update physics collider
         if (mesh.userData.collider) {
-          const col = mesh.userData.collider;
-          col.minX = mesh.position.x - col.w / 2;
-          col.maxX = mesh.position.x + col.w / 2;
+          physics.updateColliderFromMesh(mesh.userData.collider);
         }
       }
     }
