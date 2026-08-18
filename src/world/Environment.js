@@ -15,6 +15,7 @@ export class Environment {
     this.trees = [];
     this.flags = [];
     this.time = 0;
+    this.animatedMaterials = [];
   }
 
   clear() {
@@ -716,6 +717,26 @@ export class Environment {
     const group = new THREE.Group();
     const grassMat = new THREE.MeshStandardMaterial({ color: 0x228b22, roughness: 0.9, flatShading: true });
     
+    // Add custom shader for wind animation
+    grassMat.onBeforeCompile = (shader) => {
+      shader.uniforms.time = { value: 0 };
+      grassMat.userData.shader = shader;
+      shader.vertexShader = `
+        uniform float time;
+        ${shader.vertexShader}
+      `.replace(
+        `#include <begin_vertex>`,
+        `
+        #include <begin_vertex>
+        // Simple wind effect: bend based on height (position.y)
+        float wind = sin(time * 2.0 + position.x * 0.5 + position.z * 0.5) * 0.1;
+        transformed.x += wind * position.y;
+        transformed.z += wind * position.y;
+        `
+      );
+    };
+    this.animatedMaterials.push(grassMat);
+    
     // Create 3 to 5 blades of grass
     const numBlades = 3 + Math.floor(Math.random() * 3);
     for (let i = 0; i < numBlades; i++) {
@@ -743,5 +764,14 @@ export class Environment {
     group.position.set(x, y, z);
     this.scene.add(group);
     return group;
+  }
+
+  update(dt) {
+    const time = performance.now() * 0.001;
+    for (const mat of this.animatedMaterials) {
+      if (mat.userData.shader) {
+        mat.userData.shader.uniforms.time.value = time;
+      }
+    }
   }
 }

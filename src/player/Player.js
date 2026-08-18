@@ -108,7 +108,7 @@ export class Player {
     this.wasGrounded = false;
     this.moveSpeed = 6;
     this.sprintMultiplier = 2.2;
-    this.jumpForce = 10;
+    this.jumpForce = 8; // Lower jump force because gravity is lower
     this.drag = 8;
     this.playerRadius = 0.35;
     this.playerHeight = 1.5; // total capsule height

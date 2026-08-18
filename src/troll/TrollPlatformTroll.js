@@ -19,26 +19,27 @@ export class TrollPlatformTroll extends BaseTroll {
     this.speed = 15; // Move very fast (units per second)
     
     this.hasMoved = false;
+    this.active = true; // ALWAYS update this troll
     
     // Find physics collider ID to update it
     this.colliderEntry = physics.colliders.find(c => c.mesh === mesh);
   }
 
   shouldTrigger(playerPos) {
-    // Only trigger if we are close (handled by BaseTroll triggerDistance)
-    // We check the jumping condition in onUpdate since shouldTrigger doesn't get 'game'
-    return super.shouldTrigger(playerPos);
+    // Disable default trigger logic, handle it all in onUpdate
+    return false; 
   }
 
   onTrigger(game) {
-    // The player is close, but we wait for them to jump!
   }
 
   onUpdate(dt, game) {
-    if (!this.active) return; // Only active if close enough
+    if (this.completed) return; // Stop entirely if done
 
-    // Wait for the player to jump (be in the air) before moving
-    if (!this.hasMoved && !game.player.grounded) {
+    // Wait for the player to jump (be in the air) AND be close
+    const dist = game.player.getPosition().distanceTo(this.mesh.position);
+    
+    if (!this.hasMoved && !game.player.grounded && dist < this.triggerDistance) {
       this.hasMoved = true;
     }
 
@@ -57,14 +58,19 @@ export class TrollPlatformTroll extends BaseTroll {
         if (this.colliderEntry) {
           physics.updateColliderFromMesh(this.colliderEntry);
         }
+
+        // Once reached, mark as completed
+        if (this.mesh.position.x === this.targetX) {
+          this.completed = true;
+        }
       }
     }
   }
 
   onReset() {
     this.hasMoved = false;
+    this.completed = false;
     this.mesh.position.x = this.initialX;
-    this.active = false;
     if (this.colliderEntry) {
       physics.updateColliderFromMesh(this.colliderEntry);
     }
