@@ -840,6 +840,25 @@ export class Environment {
     leftBlade.castShadow = true;
     group.add(leftBlade);
     
+    // Add Fire!
+    const fireGeo = new THREE.IcosahedronGeometry(0.6, 1);
+    const fireMat = new THREE.MeshBasicMaterial({ color: 0xff4500, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
+    
+    const fire1 = new THREE.Mesh(fireGeo, fireMat);
+    fire1.position.set(1.4, -5.5, 0); // Right blade tip
+    group.add(fire1);
+
+    const fire2 = new THREE.Mesh(fireGeo, fireMat);
+    fire2.position.set(-1.4, -5.5, 0); // Left blade tip
+    group.add(fire2);
+    
+    const axeLight = new THREE.PointLight(0xff4500, 2, 15);
+    axeLight.position.set(0, -5.5, 0);
+    group.add(axeLight);
+
+    if (!this.axeFires) this.axeFires = [];
+    this.axeFires.push({ f1: fire1, f2: fire2, light: axeLight });
+
     group.position.set(x, y, z);
     this.scene.add(group);
     
@@ -904,6 +923,23 @@ export class Environment {
     for (const mat of this.animatedMaterials) {
       if (mat.userData.shader) {
         mat.userData.shader.uniforms.time.value = time;
+      }
+    }
+    
+    // Animate axe fires
+    if (this.axeFires) {
+      for (const axe of this.axeFires) {
+        const scale1 = 0.8 + Math.random() * 0.6;
+        const scale2 = 0.8 + Math.random() * 0.6;
+        axe.f1.scale.set(scale1, scale1, scale1);
+        axe.f2.scale.set(scale2, scale2, scale2);
+        
+        axe.f1.rotation.x += dt * 5;
+        axe.f1.rotation.y += dt * 3;
+        axe.f2.rotation.x -= dt * 4;
+        axe.f2.rotation.y += dt * 6;
+        
+        axe.light.intensity = 2.0 + Math.random() * 1.5;
       }
     }
   }
