@@ -205,6 +205,15 @@ export class Environment {
         group.userData.light.intensity = 2.0 + Math.random() * 0.5;
       }
     }
+
+    // Animate volumetric fire shaders
+    if (this.animatedMaterials) {
+      for (const mat of this.animatedMaterials) {
+        if (mat.uniforms && mat.uniforms.time) {
+          mat.uniforms.time.value = this.time;
+        }
+      }
+    }
   }
 
   clear() {
@@ -381,9 +390,9 @@ export class Environment {
         speed: { value: speed },
         scale: { value: scale },
         opacity: { value: 1.0 },
-        colLight: { value: new THREE.Color(0xffffbb) },
-        colNormal: { value: new THREE.Color(0xff4400) },
-        colDark: { value: new THREE.Color(0x330000) }
+        colLight: { value: new THREE.Color(0xffaa00) }, // Glowing hot orange-yellow
+        colNormal: { value: new THREE.Color(0xff2200) }, // Deep fiery red
+        colDark: { value: new THREE.Color(0x220000) }   // Dark smoldering red/black
       },
       transparent: true,
       blending: THREE.AdditiveBlending,
