@@ -774,34 +774,57 @@ export class Environment {
     handle.castShadow = true;
     group.add(handle);
 
-    // Rubber Grip at the top (near the pivot)
-    const gripGeo = new THREE.CylinderGeometry(0.18, 0.18, 1.5, 12);
-    const gripMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8 });
+    // Leather Grip
+    const gripGeo = new THREE.CylinderGeometry(0.22, 0.22, 2.5, 12);
+    const gripMat = new THREE.MeshStandardMaterial({ color: 0x8b4513, roughness: 0.9 }); // Brown leather
     const grip = new THREE.Mesh(gripGeo, gripMat);
-    grip.position.y = -0.75;
+    grip.position.y = -4.2; // Lower down on the handle
     group.add(grip);
     
-    // Metal Head Center
-    const headMat = new THREE.MeshStandardMaterial({ color: 0x9aa5af, metalness: 0.7, roughness: 0.4 });
-    const centerGeo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+    // Metal Base Pommel
+    const pommelGeo = new THREE.TorusGeometry(0.2, 0.08, 8, 16);
+    const headMat = new THREE.MeshStandardMaterial({ color: 0x9aa5af, metalness: 0.8, roughness: 0.3 });
+    const pommel = new THREE.Mesh(pommelGeo, headMat);
+    pommel.position.y = -5.8;
+    pommel.rotation.x = Math.PI / 2;
+    group.add(pommel);
+    
+    // Metal Head Center Block
+    const centerGeo = new THREE.BoxGeometry(0.8, 1.5, 0.6);
     const centerHead = new THREE.Mesh(centerGeo, headMat);
-    centerHead.position.y = -5.7; // At the bottom of the handle
+    centerHead.position.y = -1.5; // Top part of the axe
     centerHead.castShadow = true;
     group.add(centerHead);
 
-    // Hammer Striking Faces (beveled ends)
-    const faceGeo = new THREE.CylinderGeometry(0.5, 0.6, 0.8, 8);
-    const face1 = new THREE.Mesh(faceGeo, headMat);
-    face1.rotation.z = Math.PI / 2;
-    face1.position.set(-0.9, -5.7, 0);
-    face1.castShadow = true;
-    group.add(face1);
+    // Top Spike
+    const spikeGeo = new THREE.ConeGeometry(0.2, 1.0, 8);
+    const spike = new THREE.Mesh(spikeGeo, headMat);
+    spike.position.y = -0.5; // Above center block
+    spike.castShadow = true;
+    group.add(spike);
 
-    const face2 = new THREE.Mesh(faceGeo, headMat);
-    face2.rotation.z = -Math.PI / 2;
-    face2.position.set(0.9, -5.7, 0);
-    face2.castShadow = true;
-    group.add(face2);
+    // Axe Blades using ExtrudeGeometry
+    const bladeShape = new THREE.Shape();
+    bladeShape.moveTo(0, 0.6);               // Top attachment
+    bladeShape.lineTo(1.2, 1.2);             // Top tip
+    bladeShape.quadraticCurveTo(1.8, 0, 1.2, -1.2); // Curved edge
+    bladeShape.lineTo(0, -0.6);              // Bottom attachment
+    bladeShape.lineTo(0, 0.6);               // Close path
+
+    const extrudeSettings = { depth: 0.1, bevelEnabled: true, bevelSegments: 2, steps: 1, bevelSize: 0.05, bevelThickness: 0.05 };
+    const bladeGeo = new THREE.ExtrudeGeometry(bladeShape, extrudeSettings);
+    bladeGeo.translate(0, 0, -0.05); // Center on Z
+
+    const rightBlade = new THREE.Mesh(bladeGeo, headMat);
+    rightBlade.position.set(0.4, -1.5, 0); // Attach to right side of center block
+    rightBlade.castShadow = true;
+    group.add(rightBlade);
+
+    const leftBlade = new THREE.Mesh(bladeGeo, headMat);
+    leftBlade.position.set(-0.4, -1.5, 0); // Attach to left side
+    leftBlade.rotation.y = Math.PI; // Flip for the left side
+    leftBlade.castShadow = true;
+    group.add(leftBlade);
     
     group.position.set(x, y, z);
     this.scene.add(group);
