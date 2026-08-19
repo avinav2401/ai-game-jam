@@ -204,9 +204,9 @@ export class Environment {
           p.position.y += dt * p.userData.speedY;
           p.rotation.x += dt * p.userData.speedRot;
           p.rotation.y += dt * p.userData.speedRot;
-          const s = Math.max(0.01, 1.0 - (p.position.y * 1.5));
+          const s = Math.max(0.01, 1.0 - (p.position.y * 0.8));
           p.scale.setScalar(s);
-          if (p.position.y > 0.8) {
+          if (p.position.y > 1.2) {
             p.position.y = (Math.random() - 0.5) * 0.2;
             p.scale.setScalar(1);
           }
@@ -429,15 +429,15 @@ export class Environment {
 
     // Fire Particle Group (initially hidden)
     const fireGroup = new THREE.Group();
-    fireGroup.position.y = 1.6;
+    fireGroup.position.y = 1.85; // Sit ON TOP of the bowl (bowl top is 1.75)
     fireGroup.visible = false; // CheckpointManager will make it visible
     
     const parts = [];
     const fMat = new THREE.MeshBasicMaterial({ color: 0xff4400, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
     const coreMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
-    const fGeo = new THREE.BoxGeometry(0.15, 0.15, 0.15);
+    const fGeo = new THREE.BoxGeometry(0.3, 0.3, 0.3); // Bigger particles
     
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 8; i++) {
       const p = new THREE.Mesh(fGeo, i % 2 === 0 ? fMat : coreMat);
       p.position.set((Math.random()-0.5)*0.2, (Math.random()-0.5)*0.2, (Math.random()-0.5)*0.2);
       p.userData = { 
