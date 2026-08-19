@@ -197,23 +197,21 @@ export class Environment {
   update(dt) {
     this.time += dt;
 
-    // Animate flags waving
-    for (const flagGroup of this.flags) {
-      const flagMesh = flagGroup.userData.flagMesh;
-      const baseVertices = flagGroup.userData.baseVertices;
-      const positions = flagMesh.geometry.attributes.position;
-
-      for (let i = 0; i < baseVertices.length; i++) {
-        const v = baseVertices[i];
-        // Only move the X>0 part of the flag (the right side)
-        const amountX = (v.x + 0.75) / 1.5; // normalized 0 to 1 across width
+    // Animate torches (flags array now holds torches)
+    for (const group of this.flags) {
+      if (group.userData.isTorch && group.userData.fireMesh.material.opacity > 0) {
+        // Flickering effect
+        const fire = group.userData.fireMesh;
+        const scale = 1.0 + Math.sin(this.time * 20 + group.position.z) * 0.2;
+        fire.scale.set(scale, scale, scale);
         
-        // Z wave
-        const wave = Math.sin(amountX * 5 - this.time * 6) * 0.3 * amountX;
+        // Randomize light intensity slightly
+        group.userData.light.intensity = 2.0 + Math.random() * 0.5;
         
-        positions.setZ(i, v.z + wave);
+        // Make the fire randomly rotate
+        fire.rotation.x += dt * 5;
+        fire.rotation.y += dt * 3;
       }
-      positions.needsUpdate = true;
     }
   }
 
@@ -400,49 +398,57 @@ export class Environment {
   _addCheckpointFlag(x, y, z) {
     const group = new THREE.Group();
 
-    // Flagpole
+    // Wooden Torch Handle
     const pole = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.1, 0.1, 3, 8),
+      new THREE.CylinderGeometry(0.1, 0.05, 1.5, 8),
       new THREE.MeshStandardMaterial({
-        color: 0xaaaaaa,
-        roughness: 0.3,
-        metalness: 0.8
+        color: 0x5c4033, // dark wood
+        roughness: 0.9,
       })
     );
-    pole.position.y = 1.5;
+    pole.position.y = 0.75;
     pole.castShadow = true;
     group.add(pole);
 
-    // Flag Cloth
-    // Use a PlaneGeometry with more segments so we can animate the vertices
-    const flagGeo = new THREE.PlaneGeometry(1.5, 1, 10, 5);
-    const flagMat = new THREE.MeshStandardMaterial({
-      color: 0xff3333,
-      roughness: 0.8,
-      side: THREE.DoubleSide
-    });
-    const flag = new THREE.Mesh(flagGeo, flagMat);
-    // Position it so the left edge is near the pole
-    flag.position.set(0.85, 2.5, 0); 
-    flag.castShadow = true;
-    group.add(flag);
+    // Metal Bowl at top
+    const bowl = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.3, 0.1, 0.3, 8),
+      new THREE.MeshStandardMaterial({
+        color: 0x333333,
+        roughness: 0.5,
+        metalness: 0.8,
+        side: THREE.DoubleSide
+      })
+    );
+    bowl.position.y = 1.6;
+    bowl.castShadow = true;
+    group.add(bowl);
 
-    // Glow light (off by default, CheckpointManager sets intensity)
-    const light = new THREE.PointLight(0x4ade80, 0.5, 5);
-    light.position.y = 2.5;
+    // Fire Mesh (initially small/hidden)
+    const fireGeo = new THREE.IcosahedronGeometry(0.3, 1);
+    const fireMat = new THREE.MeshBasicMaterial({
+      color: 0xff6600,
+      transparent: true,
+      opacity: 0.0
+    });
+    const fire = new THREE.Mesh(fireGeo, fireMat);
+    fire.position.y = 1.8;
+    group.add(fire);
+
+    // Glow light (off by default)
+    const light = new THREE.PointLight(0xff6600, 0, 10);
+    light.position.y = 2.0;
     group.add(light);
 
-    // Store reference to flag mesh for animation
-    group.userData.flagMesh = flag;
-    group.userData.baseVertices = [];
-    const posAttribute = flagGeo.attributes.position;
-    for (let i = 0; i < posAttribute.count; i++) {
-      group.userData.baseVertices.push(new THREE.Vector3().fromBufferAttribute(posAttribute, i));
-    }
+    // Store references for the manager
+    group.userData.fireMesh = fire;
+    group.userData.light = light;
+    group.userData.isTorch = true;
 
-    group.position.set(x, y + 1, z); // Place on top of ground surface (y+1)
+    group.position.set(x, y, z); // Place on ground
     this.scene.add(group);
     
+    // We add to flags array so it gets updated if we want to animate the fire
     this.flags.push(group);
     this.objects.push(group);
     return group;

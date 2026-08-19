@@ -34,14 +34,12 @@ export class CheckpointManager {
           audio.playCheckpoint();
         }
 
-        // Visual feedback — glow
+        // Visual feedback — light the torch
         if (cp.mesh) {
-          cp.mesh.traverse(child => {
-            if (child.isMesh && child.material) {
-              child.material.emissive = new THREE.Color(0x4ade80);
-              child.material.emissiveIntensity = 2;
-            }
-          });
+          if (cp.mesh.userData.isTorch) {
+            cp.mesh.userData.fireMesh.material.opacity = 1.0;
+            cp.mesh.userData.light.intensity = 2;
+          }
         }
         return cp;
       }
