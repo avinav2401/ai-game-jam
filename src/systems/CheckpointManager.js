@@ -37,7 +37,7 @@ export class CheckpointManager {
         // Visual feedback — light the torch
         if (cp.mesh) {
           if (cp.mesh.userData.isTorch) {
-            cp.mesh.userData.fireGroup.visible = true;
+            cp.mesh.userData.fireMesh.visible = true;
             cp.mesh.userData.light.intensity = 2;
           }
         }

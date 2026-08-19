@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { physics } from '../systems/Physics.js';
+import { FireVertexShader, FireFragmentShader } from './FireShader.js';
 
 // Environment — procedural trees, rocks, bushes, signs, bridges, checkpoint pillars
 export class Environment {
@@ -199,19 +200,7 @@ export class Environment {
 
     // Animate torches (flags array now holds torches)
     for (const group of this.flags) {
-      if (group.userData.isTorch && group.userData.fireGroup.visible) {
-        for (let p of group.userData.fireParts) {
-          p.position.y += dt * p.userData.speedY;
-          p.rotation.x += dt * p.userData.speedRot;
-          p.rotation.y += dt * p.userData.speedRot;
-          const s = Math.max(0.01, 1.0 - (p.position.y * 0.8));
-          p.scale.setScalar(s);
-          if (p.position.y > 1.2) {
-            p.position.y = (Math.random() - 0.5) * 0.2;
-            p.scale.setScalar(1);
-          }
-        }
-        
+      if (group.userData.isTorch && group.userData.fireMesh.visible) {
         // Randomize light intensity slightly
         group.userData.light.intensity = 2.0 + Math.random() * 0.5;
       }
@@ -380,6 +369,32 @@ export class Environment {
     return group;
   }
 
+  _createVolumetricFire(scale, heightOffset = 0, speed = 2.0) {
+    const geo = new THREE.IcosahedronGeometry(1.0, 4); // High detail for displacement
+    const mat = new THREE.ShaderMaterial({
+      vertexShader: FireVertexShader,
+      fragmentShader: FireFragmentShader,
+      uniforms: {
+        time: { value: 0.0 },
+        seed: { value: Math.random() * 100.0 },
+        detail: { value: 1.0 },
+        speed: { value: speed },
+        scale: { value: scale },
+        opacity: { value: 1.0 },
+        colLight: { value: new THREE.Color(0xffffbb) },
+        colNormal: { value: new THREE.Color(0xff4400) },
+        colDark: { value: new THREE.Color(0x330000) }
+      },
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.y = heightOffset;
+    this.animatedMaterials.push(mat);
+    return mesh;
+  }
+
   _addBridgePlank(x, y, z) {
     const geo = new THREE.BoxGeometry(2.5, 0.15, 1);
     const mat = new THREE.MeshStandardMaterial({
@@ -427,27 +442,10 @@ export class Environment {
     bowl.castShadow = true;
     group.add(bowl);
 
-    // Fire Particle Group (initially hidden)
-    const fireGroup = new THREE.Group();
-    fireGroup.position.y = 1.85; // Sit ON TOP of the bowl (bowl top is 1.75)
-    fireGroup.visible = false; // CheckpointManager will make it visible
-    
-    const parts = [];
-    const fMat = new THREE.MeshBasicMaterial({ color: 0xff4400, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
-    const coreMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
-    const fGeo = new THREE.BoxGeometry(0.3, 0.3, 0.3); // Bigger particles
-    
-    for (let i = 0; i < 8; i++) {
-      const p = new THREE.Mesh(fGeo, i % 2 === 0 ? fMat : coreMat);
-      p.position.set((Math.random()-0.5)*0.2, (Math.random()-0.5)*0.2, (Math.random()-0.5)*0.2);
-      p.userData = { 
-        speedY: 1.0 + Math.random() * 1.5,
-        speedRot: (Math.random() - 0.5) * 8
-      };
-      fireGroup.add(p);
-      parts.push(p);
-    }
-    group.add(fireGroup);
+    // Fire Mesh
+    const fireMesh = this._createVolumetricFire(0.5, 1.85, 1.5);
+    fireMesh.visible = false; // CheckpointManager will make it visible
+    group.add(fireMesh);
 
     // Glow light (off by default)
     const light = new THREE.PointLight(0xff6600, 0, 10);
@@ -455,8 +453,7 @@ export class Environment {
     group.add(light);
 
     // Store references for the manager
-    group.userData.fireGroup = fireGroup;
-    group.userData.fireParts = parts;
+    group.userData.fireMesh = fireMesh;
     group.userData.light = light;
     group.userData.isTorch = true;
 
@@ -855,41 +852,21 @@ export class Environment {
     leftBlade.castShadow = true;
     group.add(leftBlade);
     
-    // Better Particle Fire!
-    const createFireGroup = (xOffset) => {
-      const g = new THREE.Group();
-      g.position.set(xOffset, -5.5, 0);
-      const parts = [];
-      const fMat = new THREE.MeshBasicMaterial({ color: 0xff4400, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
-      // Inner yellow core
-      const coreMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
-      
-      const fGeo = new THREE.BoxGeometry(0.3, 0.3, 0.3);
-      for(let i=0; i<8; i++) {
-        const p = new THREE.Mesh(fGeo, i % 2 === 0 ? fMat : coreMat);
-        p.position.set((Math.random()-0.5)*0.6, (Math.random()-0.5)*0.6, (Math.random()-0.5)*0.3);
-        p.userData = { 
-          speedY: 1.5 + Math.random() * 2,
-          speedRot: (Math.random() - 0.5) * 10
-        };
-        g.add(p);
-        parts.push(p);
-      }
-      return { group: g, parts };
-    };
-    
-    const fire1 = createFireGroup(1.4);
-    group.add(fire1.group);
+    // Add Volumetric Fire!
+    const fire1 = this._createVolumetricFire(0.7, 0, 3.0);
+    fire1.position.set(1.4, -5.5, 0); // Right blade tip
+    group.add(fire1);
 
-    const fire2 = createFireGroup(-1.4);
-    group.add(fire2.group);
+    const fire2 = this._createVolumetricFire(0.7, 0, 3.0);
+    fire2.position.set(-1.4, -5.5, 0); // Left blade tip
+    group.add(fire2);
     
     const axeLight = new THREE.PointLight(0xff4500, 2, 15);
     axeLight.position.set(0, -5.5, 0);
     group.add(axeLight);
 
     if (!this.axeFires) this.axeFires = [];
-    this.axeFires.push({ fire1, fire2, light: axeLight });
+    this.axeFires.push({ light: axeLight });
 
     group.position.set(x, y, z);
     this.scene.add(group);
@@ -958,34 +935,9 @@ export class Environment {
       }
     }
     
-    // Animate axe fires (particle effect)
+    // Animate axe lights
     if (this.axeFires) {
       for (const axe of this.axeFires) {
-        // Animate particles for fire1
-        for (let p of axe.fire1.parts) {
-          p.position.y += dt * p.userData.speedY;
-          p.rotation.x += dt * p.userData.speedRot;
-          p.rotation.y += dt * p.userData.speedRot;
-          const s = Math.max(0.01, 1.0 - (p.position.y * 0.6));
-          p.scale.setScalar(s);
-          if (p.position.y > 1.5) {
-            p.position.y = (Math.random() - 0.5) * 0.6;
-            p.scale.setScalar(1);
-          }
-        }
-        // Animate particles for fire2
-        for (let p of axe.fire2.parts) {
-          p.position.y += dt * p.userData.speedY;
-          p.rotation.x += dt * p.userData.speedRot;
-          p.rotation.y += dt * p.userData.speedRot;
-          const s = Math.max(0.01, 1.0 - (p.position.y * 0.6));
-          p.scale.setScalar(s);
-          if (p.position.y > 1.5) {
-            p.position.y = (Math.random() - 0.5) * 0.6;
-            p.scale.setScalar(1);
-          }
-        }
-        
         axe.light.intensity = 2.0 + Math.random() * 1.5;
       }
     }
