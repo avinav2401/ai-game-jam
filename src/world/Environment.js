@@ -452,7 +452,7 @@ export class Environment {
     group.add(bowl);
 
     // Fire Mesh
-    const fireMesh = this._createVolumetricFire(0.5, 1.85, 1.5);
+    const fireMesh = this._createVolumetricFire(0.5, 1.55, 1.5);
     fireMesh.visible = false; // CheckpointManager will make it visible
     group.add(fireMesh);
 

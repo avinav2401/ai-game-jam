@@ -166,8 +166,11 @@ void main() {
   // Squeeze the top to make it look like a flame
   vec3 newPosition = position + normal * displacement;
   
-  // Taper effect: shrink width based on height
-  float heightRatio = clamp(newPosition.y * 1.5 + 0.5, 0.0, 1.0);
+  // Shift the base of the sphere to y=0 so it sits on top of the mesh position
+  newPosition.y += 1.0;
+  
+  // Taper effect: shrink width based on height (height is now 0.0 to 2.0+)
+  float heightRatio = clamp(newPosition.y * 0.4, 0.0, 1.0);
   newPosition.x *= (1.0 - heightRatio * 0.8);
   newPosition.z *= (1.0 - heightRatio * 0.8);
   // Stretch upwards
