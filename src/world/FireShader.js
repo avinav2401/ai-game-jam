@@ -175,9 +175,9 @@ void main() {
 
   gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition * scale, 1.0 );
 }
-\`;
+`;
 
-export const FireFragmentShader = \`
+export const FireFragmentShader = `
 varying float noise;
 uniform vec3 colLight;
 uniform vec3 colNormal;
@@ -205,4 +205,4 @@ void main() {
 
   gl_FragColor = vec4( col, alpha );
 }
-\`;
+`;
