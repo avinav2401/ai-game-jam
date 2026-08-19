@@ -76,15 +76,15 @@ export class GunTreeTroll extends BaseTroll {
 
     // Aim at player
     const target = game.player.getPosition().clone().add(new THREE.Vector3(0, 1, 0));
-    // Calculate direction from tree to player
-    const dirToPlayer = new THREE.Vector3().subVectors(target, this.tree.position).normalize();
-    // Gun needs to point towards player
-    // Since tree has no rotation, we can just use lookAt
+    
+    // Get world position of the gun
     const gunWorldPos = new THREE.Vector3();
     this.gun.getWorldPosition(gunWorldPos);
-    // Tree might not rotate, but we just rotate the gun to face player
-    // Note: lookAt usually makes -Z face the target. Our gun barrel is along +Z.
-    // Let's adjust lookAt logic
+    
+    // Calculate direction from gun to player
+    const dirToPlayer = new THREE.Vector3().subVectors(target, gunWorldPos).normalize();
+    
+    // Gun needs to point towards player
     const lookTarget = gunWorldPos.clone().add(dirToPlayer);
     this.gun.lookAt(lookTarget);
     // Because lookAt makes -Z face target, and our barrel is +Z, we need to flip it
@@ -117,7 +117,7 @@ export class GunTreeTroll extends BaseTroll {
       // Gun recoil visual
       this.gun.position.addScaledVector(dir, -0.5);
       
-      audio.playZombieDeath(); // Re-use zombie sound for shot
+      audio.playShoot(); // Use new bullet sound
     }
     
     // Recover recoil

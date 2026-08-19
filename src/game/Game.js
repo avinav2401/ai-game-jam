@@ -303,7 +303,7 @@ export class Game {
         this.bullets.push({ mesh, dir, age: 0 });
         
         // Audio
-        audio.playJump(); // use jump sound for shoot for now
+        audio.playShoot();
       }
     });
 

@@ -255,6 +255,45 @@ export class AudioManager {
     src.start(t);
   }
 
+  playShoot() {
+    if (!this.ctx || !this.enabled) return;
+    const t = this.ctx.currentTime;
+    
+    // Quick, sharp noise burst
+    const src = this.ctx.createBufferSource();
+    src.buffer = this._noise(0.2);
+    
+    const f = this.ctx.createBiquadFilter();
+    f.type = 'highpass';
+    f.frequency.setValueAtTime(1000, t);
+    f.frequency.exponentialRampToValueAtTime(100, t + 0.1);
+    
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.6, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+    
+    src.connect(f);
+    f.connect(g);
+    g.connect(this.masterGain);
+    
+    // Tiny tonal 'pew' component
+    const osc = this.ctx.createOscillator();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(800, t);
+    osc.frequency.exponentialRampToValueAtTime(200, t + 0.1);
+    
+    const oscG = this.ctx.createGain();
+    oscG.gain.setValueAtTime(0.2, t);
+    oscG.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+    
+    osc.connect(oscG);
+    oscG.connect(this.masterGain);
+    
+    src.start(t);
+    osc.start(t);
+    osc.stop(t + 0.15);
+  }
+
   playExplosion() {
     if (!this.ctx || !this.enabled) return;
     const t = this.ctx.currentTime;
