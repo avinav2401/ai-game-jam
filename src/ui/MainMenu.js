@@ -73,7 +73,7 @@ export class MainMenu {
       hackBtn.style.color = 'red';
       hackBtn.style.borderColor = 'red';
       setTimeout(() => {
-        hackBtn.textContent = 'HACKS / CHEATS';
+        hackBtn.textContent = 'HACKS: OFF';
         hackBtn.style.color = '#ff00ff';
         hackBtn.style.borderColor = '#ff00ff';
       }, 2000);
