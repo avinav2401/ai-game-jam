@@ -772,62 +772,70 @@ export class Environment {
   _addHammer(x, y, z) {
     const group = new THREE.Group();
     
+    const headMat = new THREE.MeshStandardMaterial({ color: 0x9aa5af, metalness: 1.0, roughness: 0.2 });
+
+    // Pivot Ring (where it hangs from)
+    const ringGeo = new THREE.TorusGeometry(0.25, 0.08, 8, 16);
+    const ring = new THREE.Mesh(ringGeo, headMat);
+    ring.position.y = 0;
+    ring.rotation.y = Math.PI / 2;
+    group.add(ring);
+
+    // Top Cap (connects handle to ring)
+    const capGeo = new THREE.CylinderGeometry(0.2, 0.15, 0.5, 12);
+    const cap = new THREE.Mesh(capGeo, headMat);
+    cap.position.y = -0.25;
+    group.add(cap);
+
     // Wooden Handle
     const handleGeo = new THREE.CylinderGeometry(0.15, 0.2, 6, 12);
-    const handleMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.9 }); // Dark wood
+    const handleMat = new THREE.MeshStandardMaterial({ color: 0x4a2e15, roughness: 0.95 }); // Dark rich wood
     const handle = new THREE.Mesh(handleGeo, handleMat);
     handle.position.y = -3; // Hangs down from pivot
     handle.castShadow = true;
     group.add(handle);
 
-    // Leather Grip
-    const gripGeo = new THREE.CylinderGeometry(0.22, 0.22, 2.5, 12);
-    const gripMat = new THREE.MeshStandardMaterial({ color: 0x8b4513, roughness: 0.9 }); // Brown leather
+    // Leather Grip (middle of handle)
+    const gripGeo = new THREE.CylinderGeometry(0.19, 0.19, 2.5, 12);
+    const gripMat = new THREE.MeshStandardMaterial({ color: 0x6b3010, roughness: 0.8 }); // Reddish leather
     const grip = new THREE.Mesh(gripGeo, gripMat);
-    grip.position.y = -4.2; // Lower down on the handle
+    grip.position.y = -3.0;
     group.add(grip);
     
-    // Metal Base Pommel
-    const pommelGeo = new THREE.TorusGeometry(0.2, 0.08, 8, 16);
-    const headMat = new THREE.MeshStandardMaterial({ color: 0x9aa5af, metalness: 0.8, roughness: 0.3 });
-    const pommel = new THREE.Mesh(pommelGeo, headMat);
-    pommel.position.y = -5.8;
-    pommel.rotation.x = Math.PI / 2;
-    group.add(pommel);
-    
-    // Metal Head Center Block
+    // Metal Head Center Block (at the BOTTOM)
     const centerGeo = new THREE.BoxGeometry(0.8, 1.5, 0.6);
     const centerHead = new THREE.Mesh(centerGeo, headMat);
-    centerHead.position.y = -1.5; // Top part of the axe
+    centerHead.position.y = -5.5; 
     centerHead.castShadow = true;
     group.add(centerHead);
 
-    // Top Spike
+    // Spike (pointing DOWN towards the player)
     const spikeGeo = new THREE.ConeGeometry(0.2, 1.0, 8);
     const spike = new THREE.Mesh(spikeGeo, headMat);
-    spike.position.y = -0.5; // Above center block
+    spike.position.y = -6.5; 
+    spike.rotation.x = Math.PI; // point down
     spike.castShadow = true;
     group.add(spike);
 
     // Axe Blades using ExtrudeGeometry
     const bladeShape = new THREE.Shape();
-    bladeShape.moveTo(0, 0.6);               // Top attachment
-    bladeShape.lineTo(1.2, 1.2);             // Top tip
-    bladeShape.quadraticCurveTo(1.8, 0, 1.2, -1.2); // Curved edge
-    bladeShape.lineTo(0, -0.6);              // Bottom attachment
-    bladeShape.lineTo(0, 0.6);               // Close path
+    bladeShape.moveTo(0, 0.7);               
+    bladeShape.lineTo(1.3, 1.4);             
+    bladeShape.quadraticCurveTo(2.0, 0, 1.3, -1.4); 
+    bladeShape.lineTo(0, -0.7);              
+    bladeShape.lineTo(0, 0.7);               
 
-    const extrudeSettings = { depth: 0.1, bevelEnabled: true, bevelSegments: 2, steps: 1, bevelSize: 0.05, bevelThickness: 0.05 };
+    const extrudeSettings = { depth: 0.12, bevelEnabled: true, bevelSegments: 3, steps: 1, bevelSize: 0.08, bevelThickness: 0.08 };
     const bladeGeo = new THREE.ExtrudeGeometry(bladeShape, extrudeSettings);
-    bladeGeo.translate(0, 0, -0.05); // Center on Z
+    bladeGeo.translate(0, 0, -0.06); // Center on Z
 
     const rightBlade = new THREE.Mesh(bladeGeo, headMat);
-    rightBlade.position.set(0.4, -1.5, 0); // Attach to right side of center block
+    rightBlade.position.set(0.4, -5.5, 0); // Attach to right side of center block
     rightBlade.castShadow = true;
     group.add(rightBlade);
 
     const leftBlade = new THREE.Mesh(bladeGeo, headMat);
-    leftBlade.position.set(-0.4, -1.5, 0); // Attach to left side
+    leftBlade.position.set(-0.4, -5.5, 0); // Attach to left side
     leftBlade.rotation.y = Math.PI; // Flip for the left side
     leftBlade.castShadow = true;
     group.add(leftBlade);
