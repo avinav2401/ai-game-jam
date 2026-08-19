@@ -6,7 +6,7 @@ export class Zombie {
   constructor(scene, x, y, z) {
     this.scene = scene;
     this.isDead = false;
-    this.speed = 3.5;
+    this.speed = 1.8; // Much slower than before (was 3.5)
     
     // Zombie Mesh
     this.mesh = new THREE.Group();
@@ -15,6 +15,8 @@ export class Zombie {
     const skinMat = new THREE.MeshStandardMaterial({ color: 0x44aa44, roughness: 0.8, flatShading: false }); // green skin
     const shirtMat = new THREE.MeshStandardMaterial({ color: 0x554433, roughness: 0.9, flatShading: false }); // ragged brown shirt
     const pantsMat = new THREE.MeshStandardMaterial({ color: 0x222233, roughness: 0.9, flatShading: false }); // dark pants
+    const swordMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.9, roughness: 0.2 }); // shiny metal
+    const handleMat = new THREE.MeshStandardMaterial({ color: 0x553311, roughness: 0.9 }); // wooden handle
     
     // Head
     this.head = new THREE.Group();
@@ -39,35 +41,69 @@ export class Zombie {
     this.body.castShadow = true;
     this.mesh.add(this.body);
 
-    // Arms (raised forward like a classic zombie)
+    // Arms - using pivots at shoulder for proper rotation
+    // Left arm
+    this.armLPivot = new THREE.Group();
+    this.armLPivot.position.set(-0.4, 1.1, 0); // shoulder position
     this.armL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.6, 0.2), skinMat);
-    this.armL.position.set(-0.4, 1.0, 0.3);
-    this.armL.rotation.x = Math.PI / 2; // point forward
+    this.armL.position.y = -0.3; // hang down from pivot
     this.armL.castShadow = true;
-    this.mesh.add(this.armL);
+    this.armLPivot.add(this.armL);
+    this.mesh.add(this.armLPivot);
 
+    // Right arm (holds sword)
+    this.armRPivot = new THREE.Group();
+    this.armRPivot.position.set(0.4, 1.1, 0); // shoulder position
     this.armR = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.6, 0.2), skinMat);
-    this.armR.position.set(0.4, 1.0, 0.3);
-    this.armR.rotation.x = Math.PI / 2;
+    this.armR.position.y = -0.3; // hang down from pivot
     this.armR.castShadow = true;
-    this.mesh.add(this.armR);
+    this.armRPivot.add(this.armR);
+    
+    // Sword attached to right arm
+    this.sword = new THREE.Group();
+    // Blade
+    const blade = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.8, 0.02), swordMat);
+    blade.position.y = -0.4;
+    blade.castShadow = true;
+    this.sword.add(blade);
+    // Handle/guard
+    const handle = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.15, 0.08), handleMat);
+    handle.position.y = 0;
+    this.sword.add(handle);
+    // Cross-guard
+    const guard = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.04, 0.06), swordMat);
+    guard.position.y = -0.05;
+    this.sword.add(guard);
+    
+    this.sword.position.set(0, -0.6, 0); // attach at bottom of arm
+    this.armRPivot.add(this.sword);
+    this.mesh.add(this.armRPivot);
 
-    // Legs
+    // Legs - using pivots at hip for proper rotation
+    this.legLPivot = new THREE.Group();
+    this.legLPivot.position.set(-0.15, 0.5, 0); // hip
     this.legL = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.5, 0.25), pantsMat);
-    this.legL.position.set(-0.15, 0.25, 0);
+    this.legL.position.y = -0.25;
     this.legL.castShadow = true;
-    this.mesh.add(this.legL);
+    this.legLPivot.add(this.legL);
+    this.mesh.add(this.legLPivot);
 
+    this.legRPivot = new THREE.Group();
+    this.legRPivot.position.set(0.15, 0.5, 0); // hip
     this.legR = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.5, 0.25), pantsMat);
-    this.legR.position.set(0.15, 0.25, 0);
+    this.legR.position.y = -0.25;
     this.legR.castShadow = true;
-    this.mesh.add(this.legR);
+    this.legRPivot.add(this.legR);
+    this.mesh.add(this.legRPivot);
 
     this.mesh.position.set(x, y, z);
     this.scene.add(this.mesh);
     
     // Animation state
     this.walkTime = Math.random() * 10;
+    this.isSwinging = false;
+    this.swingTime = 0;
+    this.swingCooldown = 0;
   }
   
   getPosition() {
@@ -94,14 +130,17 @@ export class Zombie {
     // Calculate distance to player
     const dist = this.mesh.position.distanceTo(playerPos);
     
+    // Swing cooldown
+    if (this.swingCooldown > 0) this.swingCooldown -= dt;
+    
     // Only chase if player is within range AND has the gun
-    if (canChase && dist < 50 && dist > 1.0) {
+    if (canChase && dist < 30 && dist > 0.8) {
       // Look at player
       const targetPos = playerPos.clone();
       targetPos.y = this.mesh.position.y; // keep level
       this.mesh.lookAt(targetPos);
       
-      // Move towards player
+      // Move towards player (slow shamble)
       const dir = new THREE.Vector3().subVectors(targetPos, this.mesh.position).normalize();
       
       this.mesh.position.x += dir.x * this.speed * dt;
@@ -113,17 +152,72 @@ export class Zombie {
         this.mesh.position.y = groundY;
       }
       
-      // Animation (waddle)
-      this.walkTime += dt * 5;
-      this.armL.rotation.x = Math.sin(this.walkTime) * 0.5;
-      this.armR.rotation.x = -Math.sin(this.walkTime) * 0.5;
-      this.legL.rotation.x = -Math.sin(this.walkTime) * 0.5;
-      this.legR.rotation.x = Math.sin(this.walkTime) * 0.5;
+      // Walk animation (slow shamble)
+      this.walkTime += dt * 3; // slower leg movement
+      
+      // Body sway (zombie lurch)
+      this.body.rotation.z = Math.sin(this.walkTime * 0.5) * 0.08;
+      this.head.children[0].rotation.z = Math.sin(this.walkTime * 0.7 + 1) * 0.1; // head wobble
+      
+      // Leg animation
+      this.legLPivot.rotation.x = Math.sin(this.walkTime) * 0.4;
+      this.legRPivot.rotation.x = -Math.sin(this.walkTime) * 0.4;
+      
+      // Left arm swings with walk
+      this.armLPivot.rotation.x = -Math.sin(this.walkTime) * 0.3;
+      
+      // Right arm holds sword raised
+      if (!this.isSwinging) {
+        // Arm held forward, ready to strike
+        this.armRPivot.rotation.x = -0.5; // slight forward lean
+        this.armRPivot.rotation.z = Math.sin(this.walkTime * 0.5) * 0.1;
+      }
+      
+      // Trigger sword swing when close enough
+      if (dist < 3.0 && this.swingCooldown <= 0 && !this.isSwinging) {
+        this.isSwinging = true;
+        this.swingTime = 0;
+      }
+      
     } else {
-      // Just apply gravity to stay on ground if not chasing
+      // Idle: just apply gravity to stay on ground
       const groundY = physics.getGroundY(this.mesh.position.x, this.mesh.position.z);
       if (groundY !== -Infinity) {
         this.mesh.position.y = groundY;
+      }
+      
+      // Idle animation: subtle sway
+      this.walkTime += dt * 1.5;
+      this.body.rotation.z = Math.sin(this.walkTime * 0.3) * 0.03;
+      this.armLPivot.rotation.x = Math.sin(this.walkTime * 0.5) * 0.1;
+      this.armRPivot.rotation.x = -0.3 + Math.sin(this.walkTime * 0.5) * 0.05;
+      this.legLPivot.rotation.x = 0;
+      this.legRPivot.rotation.x = 0;
+    }
+    
+    // Sword swing animation
+    if (this.isSwinging) {
+      this.swingTime += dt;
+      
+      if (this.swingTime < 0.15) {
+        // Wind up: raise arm back
+        const t = this.swingTime / 0.15;
+        this.armRPivot.rotation.x = THREE.MathUtils.lerp(-0.5, -2.0, t);
+      } else if (this.swingTime < 0.35) {
+        // Swing down: fast slash
+        const t = (this.swingTime - 0.15) / 0.2;
+        this.armRPivot.rotation.x = THREE.MathUtils.lerp(-2.0, 0.8, t);
+      } else if (this.swingTime < 0.6) {
+        // Hold at bottom briefly
+        this.armRPivot.rotation.x = 0.8;
+      } else {
+        // Return to ready
+        const t = Math.min((this.swingTime - 0.6) / 0.3, 1.0);
+        this.armRPivot.rotation.x = THREE.MathUtils.lerp(0.8, -0.5, t);
+        if (t >= 1.0) {
+          this.isSwinging = false;
+          this.swingCooldown = 1.0; // 1 second between swings
+        }
       }
     }
   }

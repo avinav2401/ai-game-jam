@@ -28,9 +28,9 @@ export class ZombieManager {
       // Check collision with player
       if (!zombie.isDead && !player.isDead) {
         const dist = zombie.getPosition().distanceTo(playerPos);
-        if (dist < 1.5) {
-          // Zombie touches player -> Player dies
-          events.emit('playerDeath', 'You were eaten by a zombie.');
+        if (dist < 1.2) {
+          // Zombie slashes player with sword
+          events.emit('playerDeath', 'Sliced by a zombie sword!');
         }
       }
     }
