@@ -199,18 +199,21 @@ export class Environment {
 
     // Animate torches (flags array now holds torches)
     for (const group of this.flags) {
-      if (group.userData.isTorch && group.userData.fireMesh.material.opacity > 0) {
-        // Flickering effect
-        const fire = group.userData.fireMesh;
-        const scale = 1.0 + Math.sin(this.time * 20 + group.position.z) * 0.2;
-        fire.scale.set(scale, scale, scale);
+      if (group.userData.isTorch && group.userData.fireGroup.visible) {
+        for (let p of group.userData.fireParts) {
+          p.position.y += dt * p.userData.speedY;
+          p.rotation.x += dt * p.userData.speedRot;
+          p.rotation.y += dt * p.userData.speedRot;
+          const s = Math.max(0.01, 1.0 - (p.position.y * 1.5));
+          p.scale.setScalar(s);
+          if (p.position.y > 0.8) {
+            p.position.y = (Math.random() - 0.5) * 0.2;
+            p.scale.setScalar(1);
+          }
+        }
         
         // Randomize light intensity slightly
         group.userData.light.intensity = 2.0 + Math.random() * 0.5;
-        
-        // Make the fire randomly rotate
-        fire.rotation.x += dt * 5;
-        fire.rotation.y += dt * 3;
       }
     }
   }
@@ -424,16 +427,27 @@ export class Environment {
     bowl.castShadow = true;
     group.add(bowl);
 
-    // Fire Mesh (initially small/hidden)
-    const fireGeo = new THREE.IcosahedronGeometry(0.3, 1);
-    const fireMat = new THREE.MeshBasicMaterial({
-      color: 0xff6600,
-      transparent: true,
-      opacity: 0.0
-    });
-    const fire = new THREE.Mesh(fireGeo, fireMat);
-    fire.position.y = 1.8;
-    group.add(fire);
+    // Fire Particle Group (initially hidden)
+    const fireGroup = new THREE.Group();
+    fireGroup.position.y = 1.6;
+    fireGroup.visible = false; // CheckpointManager will make it visible
+    
+    const parts = [];
+    const fMat = new THREE.MeshBasicMaterial({ color: 0xff4400, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
+    const coreMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
+    const fGeo = new THREE.BoxGeometry(0.15, 0.15, 0.15);
+    
+    for (let i = 0; i < 6; i++) {
+      const p = new THREE.Mesh(fGeo, i % 2 === 0 ? fMat : coreMat);
+      p.position.set((Math.random()-0.5)*0.2, (Math.random()-0.5)*0.2, (Math.random()-0.5)*0.2);
+      p.userData = { 
+        speedY: 1.0 + Math.random() * 1.5,
+        speedRot: (Math.random() - 0.5) * 8
+      };
+      fireGroup.add(p);
+      parts.push(p);
+    }
+    group.add(fireGroup);
 
     // Glow light (off by default)
     const light = new THREE.PointLight(0xff6600, 0, 10);
@@ -441,7 +455,8 @@ export class Environment {
     group.add(light);
 
     // Store references for the manager
-    group.userData.fireMesh = fire;
+    group.userData.fireGroup = fireGroup;
+    group.userData.fireParts = parts;
     group.userData.light = light;
     group.userData.isTorch = true;
 
