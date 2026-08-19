@@ -840,24 +840,41 @@ export class Environment {
     leftBlade.castShadow = true;
     group.add(leftBlade);
     
-    // Add Fire!
-    const fireGeo = new THREE.IcosahedronGeometry(0.6, 1);
-    const fireMat = new THREE.MeshBasicMaterial({ color: 0xff4500, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
+    // Better Particle Fire!
+    const createFireGroup = (xOffset) => {
+      const g = new THREE.Group();
+      g.position.set(xOffset, -5.5, 0);
+      const parts = [];
+      const fMat = new THREE.MeshBasicMaterial({ color: 0xff4400, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
+      // Inner yellow core
+      const coreMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
+      
+      const fGeo = new THREE.BoxGeometry(0.3, 0.3, 0.3);
+      for(let i=0; i<8; i++) {
+        const p = new THREE.Mesh(fGeo, i % 2 === 0 ? fMat : coreMat);
+        p.position.set((Math.random()-0.5)*0.6, (Math.random()-0.5)*0.6, (Math.random()-0.5)*0.3);
+        p.userData = { 
+          speedY: 1.5 + Math.random() * 2,
+          speedRot: (Math.random() - 0.5) * 10
+        };
+        g.add(p);
+        parts.push(p);
+      }
+      return { group: g, parts };
+    };
     
-    const fire1 = new THREE.Mesh(fireGeo, fireMat);
-    fire1.position.set(1.4, -5.5, 0); // Right blade tip
-    group.add(fire1);
+    const fire1 = createFireGroup(1.4);
+    group.add(fire1.group);
 
-    const fire2 = new THREE.Mesh(fireGeo, fireMat);
-    fire2.position.set(-1.4, -5.5, 0); // Left blade tip
-    group.add(fire2);
+    const fire2 = createFireGroup(-1.4);
+    group.add(fire2.group);
     
     const axeLight = new THREE.PointLight(0xff4500, 2, 15);
     axeLight.position.set(0, -5.5, 0);
     group.add(axeLight);
 
     if (!this.axeFires) this.axeFires = [];
-    this.axeFires.push({ f1: fire1, f2: fire2, light: axeLight });
+    this.axeFires.push({ fire1, fire2, light: axeLight });
 
     group.position.set(x, y, z);
     this.scene.add(group);
@@ -926,18 +943,33 @@ export class Environment {
       }
     }
     
-    // Animate axe fires
+    // Animate axe fires (particle effect)
     if (this.axeFires) {
       for (const axe of this.axeFires) {
-        const scale1 = 0.8 + Math.random() * 0.6;
-        const scale2 = 0.8 + Math.random() * 0.6;
-        axe.f1.scale.set(scale1, scale1, scale1);
-        axe.f2.scale.set(scale2, scale2, scale2);
-        
-        axe.f1.rotation.x += dt * 5;
-        axe.f1.rotation.y += dt * 3;
-        axe.f2.rotation.x -= dt * 4;
-        axe.f2.rotation.y += dt * 6;
+        // Animate particles for fire1
+        for (let p of axe.fire1.parts) {
+          p.position.y += dt * p.userData.speedY;
+          p.rotation.x += dt * p.userData.speedRot;
+          p.rotation.y += dt * p.userData.speedRot;
+          const s = Math.max(0.01, 1.0 - (p.position.y * 0.6));
+          p.scale.setScalar(s);
+          if (p.position.y > 1.5) {
+            p.position.y = (Math.random() - 0.5) * 0.6;
+            p.scale.setScalar(1);
+          }
+        }
+        // Animate particles for fire2
+        for (let p of axe.fire2.parts) {
+          p.position.y += dt * p.userData.speedY;
+          p.rotation.x += dt * p.userData.speedRot;
+          p.rotation.y += dt * p.userData.speedRot;
+          const s = Math.max(0.01, 1.0 - (p.position.y * 0.6));
+          p.scale.setScalar(s);
+          if (p.position.y > 1.5) {
+            p.position.y = (Math.random() - 0.5) * 0.6;
+            p.scale.setScalar(1);
+          }
+        }
         
         axe.light.intensity = 2.0 + Math.random() * 1.5;
       }
