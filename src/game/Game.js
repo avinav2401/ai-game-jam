@@ -58,6 +58,13 @@ export class Game {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x0a0a1a);
 
+    // Menu Lighting
+    this.menuAmbient = new THREE.AmbientLight(0xffffff, 0.8);
+    this.scene.add(this.menuAmbient);
+    this.menuDirLight = new THREE.DirectionalLight(0xffffff, 2.0);
+    this.menuDirLight.position.set(5, 5, 5);
+    this.scene.add(this.menuDirLight);
+
     // Camera
     this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 300);
 
@@ -71,6 +78,7 @@ export class Game {
 
     // Player
     this.player = new Player(this.scene, this.camera);
+    this.player.loadCharacter();
 
     // UI
     this.menu = new MainMenu();
@@ -108,14 +116,7 @@ export class Game {
     });
 
     // Initialize menu
-    this.menu.init(() => this.startGame());
-    this.menu.setOnColorChange((type, color) => {
-      if (type === 'skin') {
-        this.player.setColors(color, null);
-      } else if (type === 'shirt') {
-        this.player.setColors(null, color);
-      }
-    });
+    this.menu.init(() => this.startGame(), this.player);
   }
 
   _registerTrolls() {
@@ -317,7 +318,18 @@ export class Game {
     });
   }
 
-  _loadLevel() {
+  _loadLevel(levelIndex) {
+    console.log(`Loading Level ${levelIndex}...`);
+    
+    // Remove menu lights
+    if (this.menuAmbient) {
+      this.scene.remove(this.menuAmbient);
+      this.menuAmbient = null;
+    }
+    if (this.menuDirLight) {
+      this.scene.remove(this.menuDirLight);
+      this.menuDirLight = null;
+    }
     physics.clear();
     this.world.clear();
     this.trollManager.clear();
@@ -497,6 +509,24 @@ export class Game {
            audio.playCoin(); // hit sound
         }
       }
+    } else if (this.state.is(STATES.MENU)) {
+      // Allow the player's Idle animation to play in the menu
+      if (this.player.mixer) {
+        this.player.mixer.update(clampedDt);
+      }
+      
+      // Sync visuals position so they aren't at 0,0,0 while the mesh is at 0,2,0
+      this.player.visuals.position.copy(this.player.mesh.position);
+      
+      // Face the camera in the menu
+      this.player.visuals.rotation.y = 0;
+      
+      // Position camera to show the character on the left side of the screen
+      const p = this.player.visuals.position;
+      // Position camera to the RIGHT so the character appears on the LEFT
+      // Move camera back and look higher so the character appears lower
+      this.camera.position.set(p.x + 2.0, p.y + 1.5, p.z + 5);
+      this.camera.lookAt(p.x + 1.0, p.y + 1.5, p.z);
     }
 
     // World always updates (tree animation etc)
@@ -506,6 +536,14 @@ export class Game {
     this.particles.update(clampedDt);
 
     // Render
+    this.frameCount = (this.frameCount || 0) + 1;
+    if (this.frameCount % 60 === 0) {
+      console.log('RENDER STATE:', {
+        camPos: this.camera.position.toArray(),
+        playerPos: this.player.visuals.position.toArray(),
+        sceneChildren: this.scene.children.length
+      });
+    }
     this.renderer.render(this.scene, this.camera);
   }
 

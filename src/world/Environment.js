@@ -186,9 +186,9 @@ export class Environment {
       this.ladder = this._addLadder(5, -3, -205);
       
       this.hammers = [
-        this._addHammer(0, 6, -170),
-        this._addHammer(0, 6, -190),
-        this._addHammer(0, 6, -210)
+        this._addHammer(0, 3.5, -170),
+        this._addHammer(0, 3.5, -190),
+        this._addHammer(0, 3.5, -210)
       ];
       
       this.gunPickup = this._addGunPickup(0, 4, -240);

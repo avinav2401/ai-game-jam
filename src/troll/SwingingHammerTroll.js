@@ -36,6 +36,7 @@ export class SwingingHammerTroll extends BaseTroll {
     // Check collision with player
     // The hammer head is at local y=-6. Let's find its world position.
     const headLocal = new THREE.Vector3(0, -6, 0);
+    this.hammer.updateMatrixWorld(true);
     const headWorld = headLocal.applyMatrix4(this.hammer.matrixWorld);
     
     const playerPos = game.player.getPosition();

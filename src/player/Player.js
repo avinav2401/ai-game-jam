@@ -9,136 +9,17 @@ export class Player {
   constructor(scene, camera) {
     this.scene = scene;
 
-    // Player mesh — stylized boy character
     this.mesh = new THREE.Group();
     this.visuals = new THREE.Group();
-    this.mesh.add(this.visuals);
-    this.visuals.position.y = -0.68; // Shift down so feet touch the ground
+    scene.add(this.visuals);
     
-    // Materials
-    this.skinMat = new THREE.MeshStandardMaterial({ color: 0xcd9a5b, roughness: 0.6, flatShading: true });
-    this.shirtMat = new THREE.MeshStandardMaterial({ color: 0x0f5e9c, roughness: 0.7, flatShading: true });
-    this.pantsMat = new THREE.MeshStandardMaterial({ color: 0x808080, roughness: 0.9, flatShading: true });
-    this.hairMat = new THREE.MeshStandardMaterial({ color: 0x3d2010, roughness: 0.9, flatShading: true });
-    this.shoeMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.8, flatShading: true });
-    const glassFrameMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5, flatShading: true });
-    const glassLensMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2, flatShading: true, opacity: 0.8, transparent: true });
-
-    // Head (Tapered box/cube)
-    this.head = new THREE.Group();
-    // Using a 4-sided cylinder to create a tapered box
-    const headGeo = new THREE.CylinderGeometry(0.35, 0.25, 0.5, 4);
-    // Rotate 45 degrees so flat sides face front/back/left/right
-    headGeo.rotateY(Math.PI / 4);
-    const headMesh = new THREE.Mesh(headGeo, this.skinMat);
-    headMesh.castShadow = true;
-    this.head.add(headMesh);
-    
-    // Hair (Stylized blocky hair)
-    const hairGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.2, 8);
-    // Add a top bump for the afro/puffy look
-    const hairTopGeo = new THREE.SphereGeometry(0.35, 8, 8);
-    hairTopGeo.translate(0, 0.1, 0);
-    const hairMesh = new THREE.Mesh(hairGeo, this.hairMat);
-    const hairTop = new THREE.Mesh(hairTopGeo, this.hairMat);
-    hairMesh.add(hairTop);
-    hairMesh.position.set(0, 0.15, -0.02);
-    hairMesh.castShadow = true;
-    this.head.add(hairMesh);
-
-    // Glasses
-    const frameGeo = new THREE.BoxGeometry(0.24, 0.12, 0.04);
-    const lensGeo = new THREE.BoxGeometry(0.18, 0.08, 0.05);
-    
-    const leftFrame = new THREE.Mesh(frameGeo, glassFrameMat);
-    leftFrame.position.set(-0.14, 0.05, 0.25);
-    leftFrame.rotation.y = -0.15;
-    const leftLens = new THREE.Mesh(lensGeo, glassLensMat);
-    leftLens.position.set(-0.14, 0.05, 0.25);
-    leftLens.rotation.y = -0.15;
-    
-    const rightFrame = new THREE.Mesh(frameGeo, glassFrameMat);
-    rightFrame.position.set(0.14, 0.05, 0.25);
-    rightFrame.rotation.y = 0.15;
-    const rightLens = new THREE.Mesh(lensGeo, glassLensMat);
-    rightLens.position.set(0.14, 0.05, 0.25);
-    rightLens.rotation.y = 0.15;
-    
-    const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.03, 0.04), glassFrameMat);
-    bridge.position.set(0, 0.05, 0.27);
-
-    this.head.add(leftFrame, leftLens, rightFrame, rightLens, bridge);
-
-    // Mouth (Frown)
-    const mouthMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-    const mouthGeo = new THREE.BoxGeometry(0.06, 0.015, 0.02);
-    const mouth = new THREE.Mesh(mouthGeo, mouthMat);
-    mouth.position.set(0, -0.1, 0.25);
-    // To make it look like a frown, tilt two small boxes
-    const mouthL = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.015, 0.02), mouthMat);
-    mouthL.position.set(-0.02, -0.11, 0.25);
-    mouthL.rotation.z = -0.2;
-    const mouthR = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.015, 0.02), mouthMat);
-    mouthR.position.set(0.02, -0.11, 0.25);
-    mouthR.rotation.z = 0.2;
-    this.head.add(mouth, mouthL, mouthR);
-    
-    this.head.position.y = 1.25;
-    this.visuals.add(this.head);
-
-    // Body (Shirt) - Rounded
-    this.body = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.22, 0.5, 16), this.shirtMat);
-    this.body.position.y = 0.75;
-    this.body.castShadow = true;
-    this.visuals.add(this.body);
-
-    // Arms
-    this.armL = new THREE.Group();
-    const armLMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.4, 16), this.shirtMat);
-    armLMesh.position.y = -0.2;
-    const handL = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 16), this.skinMat);
-    handL.position.y = -0.42;
-    armLMesh.castShadow = true;
-    handL.castShadow = true;
-    this.armL.add(armLMesh, handL);
-    this.armL.position.set(-0.25, 0.9, 0);
-    this.armL.rotation.z = -0.1; // Rest slightly angled outward
-    this.visuals.add(this.armL);
-
-    this.armR = new THREE.Group();
-    const armRMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.4, 16), this.shirtMat);
-    armRMesh.position.y = -0.2;
-    const handR = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 16), this.skinMat);
-    handR.position.y = -0.42;
-    armRMesh.castShadow = true;
-    handR.castShadow = true;
-    this.armR.add(armRMesh, handR);
-    this.armR.position.set(0.25, 0.9, 0);
-    this.armR.rotation.z = 0.1; // Rest slightly angled outward
-    this.visuals.add(this.armR);
-
-    // Legs
-    this.legL = new THREE.Group();
-    const legLMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.07, 0.4, 16), this.pantsMat);
-    const shoeL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.1, 0.18), this.shoeMat);
-    legLMesh.position.y = -0.2;
-    shoeL.position.set(0, -0.45, 0.03);
-    legLMesh.castShadow = true;
-    shoeL.castShadow = true;
-    this.legL.add(legLMesh, shoeL);
-    this.legL.position.set(-0.11, 0.5, 0);
-    this.visuals.add(this.legL);
-
-    this.legR = new THREE.Group();
-    const legRMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.07, 0.4, 16), this.pantsMat);
-    const shoeR = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.1, 0.18), this.shoeMat);
-    legRMesh.position.y = -0.2;
-    shoeR.position.set(0, -0.45, 0.03);
-    legRMesh.castShadow = true;
-    shoeR.castShadow = true;
-    this.legR.add(legRMesh, shoeR);
-    this.legR.position.set(0.11, 0.5, 0);
-    this.visuals.add(this.legR);
+    // Create a container for the imported rigged character
+    this.characterGroup = new THREE.Group();
+    // Typical Blender export fixes
+    this.characterGroup.rotation.x = Math.PI / 2;
+    this.characterGroup.scale.set(0.01, 0.01, 0.01);
+    this.characterGroup.position.y = -0.75;
+    this.visuals.add(this.characterGroup);
 
     this.mesh.position.set(0, 2, 0);
     scene.add(this.mesh);
@@ -149,12 +30,12 @@ export class Player {
     this.wasGrounded = false;
     this.moveSpeed = 6;
     this.sprintMultiplier = 2.2;
-    this.jumpForce = 12; // Adjust for snappier jump
+    this.jumpForce = 12;
     this.drag = 8;
     this.playerRadius = 0.35;
-    this.playerHeight = 1.5; // total capsule height
+    this.playerHeight = 1.5;
 
-    // Footstep timer and animation state
+    // Footstep timer
     this.footstepTimer = 0;
     this.footstepInterval = 0.35;
     this.walkTime = 0;
@@ -163,41 +44,213 @@ export class Player {
     this.controller = new PlayerController();
     this.playerCamera = new PlayerCamera(camera);
 
-    // Dead state
     this.isDead = false;
     this.hasGun = false;
 
-    // Gun Model
-    this.gun = new THREE.Group();
-    const gunBody = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.25, 0.15), new THREE.MeshStandardMaterial({ color: 0x333333 }));
-    const gunBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.4), new THREE.MeshStandardMaterial({ color: 0x333333 }));
-    // Cylinder is along Y. The gun body is 0.25 along Y.
-    // Move barrel to the top of the body
-    gunBarrel.position.set(0, 0.2, 0.05);
-    this.gun.add(gunBody, gunBarrel);
-    
-    // Attach to hand. The arm is a capsule along Y.
-    // When holding gun, arm is rotated -PI/2 on X, so its Y points backwards, -Y points forward.
-    // We want the gun barrel to point in local -Y.
-    // So gun needs to be rotated PI around X so its Y points to arm's -Y.
-    this.gun.rotation.x = Math.PI;
-    this.gun.position.set(0, -0.3, 0.05); // near bottom of the arm
-    
-    this.gun.visible = false;
-    this.armR.add(this.gun);
-
     // Knockback
     this.knockback = new THREE.Vector3();
+    
+    // Animation
+    this.mixer = null;
+    this.actions = {};
+    this.activeAction = null;
+    
+    // Customization state
+    this.customization = {
+      Head: 'Head.001.glb',
+      Top: 'Top.002.glb',
+      Bottom: 'Bottom.001.glb',
+      Shoes: 'Shoes.001.glb',
+      Hair: 'Hair.004.glb',
+      Eyes: 'Eyes.001.glb',
+      Nose: 'Nose.001.glb',
+      EyeBrow: 'EyeBrow.001.glb',
+      Face: null,
+      Glasses: null,
+      Hat: null,
+      FacialHair: null
+    };
+    
+    this.skinColor = new THREE.Color(0xf5c6a5); // Default from r3f config
+    this.loadedParts = {}; // Keeps track of meshes per category
+    this.mainSkeleton = null; // Stored to bind new parts later
+    this.armatureGroup = null; // Where parts are added
+
+    // Loading flag
+    this.isLoaded = false;
+  }
+
+  async loadCharacter() {
+    // Import GLTFLoader dynamically or globally
+    const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
+    const loader = new GLTFLoader();
+
+    try {
+      // 1. Character container (equivalent to the outer <group ref={group}> in R3F)
+      this.characterGroup = new THREE.Group();
+      this.characterGroup.position.y = -this.playerHeight / 2;
+      
+      // We must add the new character group to visuals!
+      this.visuals.clear(); 
+      this.visuals.add(this.characterGroup);
+      
+      const sceneGroup = new THREE.Group();
+      sceneGroup.name = 'Scene';
+      this.characterGroup.add(sceneGroup);
+      
+      const armatureGroup = new THREE.Group();
+      armatureGroup.name = 'Armature';
+      armatureGroup.rotation.x = Math.PI / 2;
+      armatureGroup.scale.set(0.01, 0.01, 0.01);
+      sceneGroup.add(armatureGroup);
+      this.armatureGroup = armatureGroup;
+
+      // 2. Load Armature
+      const armatureGltf = await loader.loadAsync('/models/character/Armature.glb');
+      const armatureScene = armatureGltf.scene;
+      
+      let mainSkeleton = null;
+      armatureScene.traverse((child) => {
+        if (child.isSkinnedMesh) {
+          child.frustumCulled = false;
+          if (!mainSkeleton) {
+            mainSkeleton = child.skeleton;
+            this.mainSkeleton = child.skeleton;
+          }
+        }
+      });
+      
+      const hips = armatureScene.getObjectByName('mixamorigHips');
+      if (hips) {
+        armatureGroup.add(hips);
+      }
+      
+      // Store bones for procedural animation
+      this.bones = {
+        leftLeg: armatureScene.getObjectByName('mixamorigLeftUpLeg'),
+        rightLeg: armatureScene.getObjectByName('mixamorigRightUpLeg'),
+        leftKnee: armatureScene.getObjectByName('mixamorigLeftLeg'),
+        rightKnee: armatureScene.getObjectByName('mixamorigRightLeg'),
+        leftArm: armatureScene.getObjectByName('mixamorigLeftArm'),
+        rightArm: armatureScene.getObjectByName('mixamorigRightArm'),
+      };
+
+      // 3. Load Clothing Parts
+      for (const [category, filename] of Object.entries(this.customization)) {
+        if (filename) {
+          await this.loadPart(category, filename, loader);
+        }
+      }
+
+      // 4. Load Animations
+      const posesGltf = await loader.loadAsync('/models/character/Poses.glb');
+      this.mixer = new THREE.AnimationMixer(this.characterGroup);
+      this.actions = {};
+      
+      posesGltf.animations.forEach((clip) => {
+        this.actions[clip.name] = this.mixer.clipAction(clip);
+      });
+
+      // Set default animation to Idle
+      if (this.actions['Idle']) {
+        this.activeAction = this.actions['Idle'];
+        this.activeAction.play();
+      }
+
+      this.isLoaded = true;
+      this.visuals.add(this.characterGroup);
+      
+      const box = new THREE.Box3().setFromObject(this.characterGroup);
+      console.log('Character loaded. Bounding box:', box.min, box.max);
+      events.emit('playerLoaded');
+      
+    } catch (err) {
+      console.error("Failed to load character model:", err);
+    }
+  }
+
+  async loadPart(category, filename, existingLoader = null) {
+    if (!filename) return;
+    
+    // Import loader if not provided
+    let loader = existingLoader;
+    if (!loader) {
+      const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
+      loader = new GLTFLoader();
+    }
+
+    try {
+      const partGltf = await loader.loadAsync(`/models/character/${filename}`);
+      
+      // Store meshes for this category so we can remove them later
+      if (!this.loadedParts[category]) {
+        this.loadedParts[category] = [];
+      }
+      
+      partGltf.scene.traverse((child) => {
+        if (child.isMesh) {
+          const newMesh = new THREE.SkinnedMesh(child.geometry, child.material.clone());
+          newMesh.castShadow = true;
+          newMesh.receiveShadow = true;
+          newMesh.frustumCulled = false;
+          
+          if (newMesh.material) {
+            newMesh.material.roughness = 0.8;
+            
+            // If it's a skin material, apply the current skin color
+            if (newMesh.material.name && newMesh.material.name.includes('Skin')) {
+              newMesh.material.color.copy(this.skinColor);
+            }
+          }
+          
+          if (this.mainSkeleton) {
+            newMesh.skeleton = this.mainSkeleton;
+          }
+          
+          this.armatureGroup.add(newMesh);
+          this.loadedParts[category].push(newMesh);
+        }
+      });
+    } catch (err) {
+      console.error(`Failed to load character part ${filename}:`, err);
+    }
+  }
+
+  async updatePart(category, filename) {
+    // 1. Remove old parts for this category
+    if (this.loadedParts[category]) {
+      this.loadedParts[category].forEach(mesh => {
+        this.armatureGroup.remove(mesh);
+        if (mesh.geometry) mesh.geometry.dispose();
+        if (mesh.material) mesh.material.dispose();
+      });
+      this.loadedParts[category] = [];
+    }
+
+    // 2. Update state
+    this.customization[category] = filename;
+
+    // 3. Load new part if one is selected
+    if (filename) {
+      await this.loadPart(category, filename);
+    }
+  }
+
+  updateSkinColor(hexColor) {
+    this.skinColor.set(hexColor);
+    // Update all existing skin materials
+    Object.values(this.loadedParts).forEach(meshArray => {
+      meshArray.forEach(mesh => {
+        if (mesh.material && mesh.material.name && mesh.material.name.includes('Skin')) {
+          mesh.material.color.copy(this.skinColor);
+        }
+      });
+    });
   }
 
   equipGun() {
     this.hasGun = true;
-    this.gun.visible = true;
-    
-    // Raise arm to aim forward
-    this.armR.rotation.x = -Math.PI / 2;
-    this.armR.rotation.z = 0.2;
-    this.armR.position.set(0.35, 1.2, -0.2); // bring it forward a bit
+    // Gun logic needs re-implementation with right hand bone later
   }
 
   applyKnockback(force) {
@@ -207,12 +260,8 @@ export class Player {
   }
 
   setColors(skinColorHex, shirtColorHex) {
-    if (skinColorHex !== null) {
-      this.skinMat.color.setHex(skinColorHex);
-    }
-    if (shirtColorHex !== null) {
-      this.shirtMat.color.setHex(shirtColorHex);
-    }
+    // Currently relying on the loaded GLB colors.
+    // If needed, we can traverse the characterGroup and change specific materials.
   }
 
   update(dt) {
@@ -282,6 +331,7 @@ export class Player {
 
     // Apply position
     this.mesh.position.copy(nextPos);
+    this.visuals.position.copy(nextPos);
 
     // Rotate mesh to face movement direction
     if (dir.length() > 0.1) {
@@ -293,43 +343,61 @@ export class Player {
       
       this.mesh.rotation.y += diff * Math.min(1, 10 * dt);
     }
+    this.visuals.rotation.copy(this.mesh.rotation);
 
-    // Animation
+    // Animation Mixer Update
+    if (this.mixer) {
+      this.mixer.update(dt);
+    }
+
     const speedLen = dir.length();
     if (this.grounded && speedLen > 0.1) {
       this.walkTime += dt * (sprint ? 15 : 10);
       
-      // Arm swing
-      this.armL.rotation.x = Math.sin(this.walkTime) * 0.8;
-      if (!this.hasGun) {
-        this.armR.rotation.x = -Math.sin(this.walkTime) * 0.8;
+      // Keep playing Idle for the base posture
+      if (this.actions['Idle'] && this.activeAction !== this.actions['Idle']) {
+        if (this.activeAction) this.activeAction.fadeOut(0.2);
+        this.activeAction = this.actions['Idle'];
+        this.activeAction.reset().fadeIn(0.2).play();
       }
-      
-      // Leg swing
-      this.legL.rotation.x = -Math.sin(this.walkTime) * 0.6;
-      this.legR.rotation.x = Math.sin(this.walkTime) * 0.6;
-      
-      // Body bob
-      this.body.position.y = 0.85 + Math.abs(Math.sin(this.walkTime)) * 0.05;
-      this.head.position.y = 1.35 + Math.abs(Math.sin(this.walkTime)) * 0.05;
+
+      // Procedurally animate bones
+      if (this.bones) {
+        const walkCycle = this.walkTime;
+        // Legs swing
+        if (this.bones.leftLeg) this.bones.leftLeg.rotation.x += Math.sin(walkCycle) * 0.6;
+        if (this.bones.rightLeg) this.bones.rightLeg.rotation.x += Math.sin(walkCycle + Math.PI) * 0.6;
+        
+        // Knees bend when swinging forward
+        if (this.bones.leftKnee) this.bones.leftKnee.rotation.x += Math.max(0, Math.sin(walkCycle) * 0.8);
+        if (this.bones.rightKnee) this.bones.rightKnee.rotation.x += Math.max(0, Math.sin(walkCycle + Math.PI) * 0.8);
+
+        // Arms swing opposite to legs
+        if (this.bones.leftArm) this.bones.leftArm.rotation.x += Math.sin(walkCycle + Math.PI) * 0.5;
+        if (this.bones.rightArm) this.bones.rightArm.rotation.x += Math.sin(walkCycle) * 0.5;
+      }
 
       this.footstepTimer += dt * (sprint ? 1.5 : 1);
       if (this.footstepTimer >= this.footstepInterval) {
         this.footstepTimer = 0;
         audio.playFootstep();
       }
+
+      // Add bobbing effect to visuals
+      this.visuals.position.y = this.mesh.position.y + Math.abs(Math.sin(this.walkTime * 1.5)) * 0.15;
     } else {
       // Return to idle
       this.walkTime = 0;
-      this.armL.rotation.x = THREE.MathUtils.lerp(this.armL.rotation.x, 0, 10 * dt);
-      if (!this.hasGun) {
-        this.armR.rotation.x = THREE.MathUtils.lerp(this.armR.rotation.x, 0, 10 * dt);
-      }
-      this.legL.rotation.x = THREE.MathUtils.lerp(this.legL.rotation.x, 0, 10 * dt);
-      this.legR.rotation.x = THREE.MathUtils.lerp(this.legR.rotation.x, 0, 10 * dt);
-      this.body.position.y = THREE.MathUtils.lerp(this.body.position.y, 0.85, 10 * dt);
-      this.head.position.y = THREE.MathUtils.lerp(this.head.position.y, 1.35, 10 * dt);
       this.footstepTimer = 0;
+      
+      // Smoothly return visual to original height
+      this.visuals.position.y = THREE.MathUtils.lerp(this.visuals.position.y, this.mesh.position.y, dt * 10);
+
+      if (this.actions['Idle'] && this.activeAction !== this.actions['Idle']) {
+        if (this.activeAction) this.activeAction.fadeOut(0.2);
+        this.activeAction = this.actions['Idle'];
+        this.activeAction.reset().fadeIn(0.2).play();
+      }
     }
 
     // Fall off world → death
@@ -351,12 +419,6 @@ export class Player {
     this.velocity.set(0, 0, 0);
     this.isDead = false;
     this.hasGun = false;
-    this.gun.visible = false;
-    
-    // Reset arm position
-    this.armR.rotation.x = 0;
-    this.armR.rotation.z = 0;
-    this.armR.position.set(0.35, 1.1, 0);
     
     this.mesh.rotation.z = 0;
     this.mesh.rotation.x = 0;
